@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, Users, Eye, Mail, Instagram, Linkedin, BarChart3, Activity, Sparkles, ArrowRight } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 
 const BrokerPortfolio = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -56,6 +57,7 @@ const BrokerPortfolio = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-teal-50">
+      <Analytics />
       {/* Simple Header */}
       <header className="max-w-4xl mx-auto px-6 py-8">
         <nav className="flex items-center justify-between mb-12">
