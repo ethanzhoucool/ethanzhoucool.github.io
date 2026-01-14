@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Users, Eye, Award, Mail, Phone, Instagram, Linkedin, Target, BarChart3 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { TrendingUp, Users, Eye, Mail, Instagram, Linkedin, BarChart3, Activity, Sparkles, ArrowRight } from 'lucide-react';
 
 const BrokerPortfolio = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [mounted, setMounted] = useState(false);
+  const [hoveredStat, setHoveredStat] = useState(null);
+  const [typedText, setTypedText] = useState('');
+  const fullText = 'ethan!';
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    let currentIndex = 0;
+    const typingInterval = setInterval(() => {
+      if (currentIndex <= fullText.length) {
+        setTypedText(fullText.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 150);
 
-  // Growth data for your content creation
-  const growthData = [
-    { month: 'Aug', value: 500 },
-    { month: 'Oct', value: 1200 },
-    { month: 'Dec', value: 2400 },
-    { month: 'Feb', value: 4500 },
-    { month: 'Apr', value: 6800 },
-    { month: 'Jun', value: 9000 }
-  ];
+    return () => clearInterval(typingInterval);
+  }, []);
 
   const experience = [
     {
@@ -51,167 +54,258 @@ const BrokerPortfolio = () => {
     }
   ];
 
-  const skills = [
-    { name: 'Digital Marketing & Growth', level: 95, color: 'bg-cyan-500' },
-    { name: 'SEO Optimization', level: 92, color: 'bg-blue-500' },
-    { name: 'Content Creation & Video', level: 90, color: 'bg-green-500' },
-    { name: 'Social Media Management', level: 88, color: 'bg-purple-500' },
-    { name: 'Data-Driven Strategy', level: 85, color: 'bg-yellow-500' }
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <span className="text-xl font-bold">Ethan Zhou</span>
-            </div>
-            <nav className="flex gap-6">
-              <button onClick={() => setActiveTab('overview')} className="text-sm text-slate-400 hover:text-white transition-colors">Overview</button>
-              <button onClick={() => setActiveTab('experience')} className="text-sm text-slate-400 hover:text-white transition-colors">Experience</button>
-              <button onClick={() => setActiveTab('skills')} className="text-sm text-slate-400 hover:text-white transition-colors">Skills</button>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Hero Section */}
-        <div className={`mb-8 transition-all duration-1000 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-8 border border-slate-700/50 backdrop-blur-sm">
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  Ethan Zhou
-                </h1>
-                <p className="text-slate-400 text-lg mb-2">Engineering & Business Student</p>
-                <p className="text-slate-500 mb-4">Western University | Marketing & Growth Strategy</p>
-                <div className="flex gap-4 mb-6">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Award className="w-4 h-4 text-yellow-500" />
-                    <span className="text-slate-400">Western Scholarship of Excellence</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Target className="w-4 h-4 text-cyan-500" />
-                    <span className="text-slate-400">Ivey AEO</span>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <a href="mailto:ethan.st.zhou@gmail.com" className="bg-cyan-600 hover:bg-cyan-700 px-6 py-2 rounded-lg font-medium transition-all transform hover:scale-105 flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    Get in Touch
-                  </a>
-                  <a href="https://instagram.com/ethanzhouwealth" target="_blank" rel="noopener noreferrer" className="bg-slate-700 hover:bg-slate-600 px-6 py-2 rounded-lg font-medium transition-all flex items-center gap-2">
-                    <Instagram className="w-4 h-4" />
-                    @ethanzhouwealth
-                  </a>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold text-green-500 mb-1">3M+</div>
-                <div className="text-sm text-slate-400">Total Views</div>
-                <div className="text-xl font-bold text-cyan-500 mt-2">9K+</div>
-                <div className="text-sm text-slate-400">Followers</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="flex gap-2 mb-6 bg-slate-800/30 p-1 rounded-xl w-fit">
-          {['overview', 'experience', 'skills'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                activeTab === tab
-                  ? 'bg-slate-700 text-white'
-                  : 'text-slate-400 hover:text-white'
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-teal-50">
+      {/* Simple Header */}
+      <header className="max-w-4xl mx-auto px-6 py-8">
+        <nav className="flex items-center justify-between mb-12">
+          <button 
+            onClick={() => setActiveTab('overview')}
+            className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent hover:scale-95 active:scale-90 transition-all duration-200 cursor-pointer hover:opacity-80"
+          >
+            ethan zhou
+          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setActiveTab('about')} 
+              className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                activeTab === 'about' 
+                  ? 'bg-blue-100 text-blue-700 font-semibold shadow-md' 
+                  : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm active:scale-95'
               }`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              about
             </button>
-          ))}
-        </div>
+            <button 
+              onClick={() => setActiveTab('projects')} 
+              className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                activeTab === 'projects' 
+                  ? 'bg-blue-100 text-blue-700 font-semibold shadow-md' 
+                  : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm active:scale-95'
+              }`}
+            >
+              projects
+            </button>
+            <button 
+              onClick={() => setActiveTab('experience')} 
+              className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                activeTab === 'experience' 
+                  ? 'bg-blue-100 text-blue-700 font-semibold shadow-md' 
+                  : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm active:scale-95'
+              }`}
+            >
+              experience
+            </button>
+            <button 
+              onClick={() => setActiveTab('media')} 
+              className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                activeTab === 'media' 
+                  ? 'bg-blue-100 text-blue-700 font-semibold shadow-md' 
+                  : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm active:scale-95'
+              }`}
+            >
+              social media
+            </button>
+          </div>
+        </nav>
 
-        {/* Overview Tab */}
+        {/* Hero Section */}
         {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* About Section */}
-            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
-              <h2 className="text-xl font-semibold mb-4">About</h2>
-              <div className="space-y-3 text-slate-300">
-                <p>
-                  I'm pursuing a <span className="text-white font-semibold">Bachelor of Engineering with Honours Business Administration</span> at Western University, awarded the <span className="text-cyan-400">Western Scholarship of Excellence</span> and accepted into <span className="text-cyan-400">Ivey's Advanced Entry Opportunity (AEO)</span> for the HBA dual degree.
-                </p>
-                <p>
-                  I've worked on improving website performance, growing social media audiences, and building educational content that has reached millions of viewers across platforms.
-                </p>
-                <p>
-                  I'm especially interested in growth strategy, digital marketing, and building scalable online systems.
-                </p>
+          <div className={`transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            {/* Photo Placeholder */}
+            <div className="mb-8 flex justify-center">
+              <div className="w-48 h-48 rounded-full shadow-2xl border-4 border-white hover:scale-110 transition-transform duration-500 overflow-hidden">
+                <img src="/images/headshot.jpg" alt="Ethan Zhou" className="w-full h-full object-cover" />
               </div>
             </div>
 
-            {/* Growth Chart */}
-            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Audience Growth</h2>
-                <span className="text-green-500 text-sm font-medium flex items-center gap-1">
-                  <TrendingUp className="w-4 h-4" />
-                  +1700% since launch
+            <div className="text-center mb-12">
+              <h1 className="text-5xl md:text-6xl font-bold mb-4">
+                <span className="inline-block bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
+                  hey there, i'm 
                 </span>
+                <br />
+                <span className="inline-block bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
+                  {typedText}
+                  <span className="animate-pulse">|</span>
+                </span>
+              </h1>
+              <div className="flex items-center justify-center gap-2 text-gray-700 mb-2">
+                <Sparkles className="w-4 h-4 text-blue-500" />
+                <span className="text-lg">engineering & business @ western university</span>
               </div>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={growthData}>
-                  <XAxis dataKey="month" stroke="#64748b" />
-                  <YAxis stroke="#64748b" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#1e293b',
-                      border: '1px solid #334155',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#06b6d4"
-                    strokeWidth={3}
-                    dot={{ fill: '#06b6d4', r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <div className="flex items-center justify-center gap-2 text-gray-700 mb-6">
+                <Sparkles className="w-4 h-4 text-teal-500" />
+                <span className="text-lg">content creator x growth strategist</span>
+              </div>
+
+              {/* Connect Buttons */}
+              <div className="flex flex-wrap justify-center gap-3 mb-12">
+                <a 
+                  href="mailto:ethan.st.zhou@gmail.com"
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-teal-600 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                >
+                  <Mail className="w-4 h-4" />
+                  let's connect!
+                </a>
+                <a 
+                  href="https://instagram.com/ethanzhouwealth"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all hover:scale-105 border-2 border-blue-200"
+                >
+                  <Instagram className="w-4 h-4" />
+                  @ethanzhouwealth
+                </a>
+                <a 
+                  href="https://www.linkedin.com/in/ethan-zhou-832565315/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all hover:scale-105 border-2 border-teal-200"
+                >
+                  <Linkedin className="w-4 h-4" />
+                  linkedin
+                </a>
+              </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
-                <div className="flex items-center gap-3 mb-2">
-                  <Eye className="w-5 h-5 text-cyan-500" />
-                  <span className="text-slate-400 text-sm">Total Views</span>
-                </div>
-                <div className="text-3xl font-bold">3M+</div>
+            {/* About Section */}
+            <div className="bg-white rounded-3xl p-8 shadow-xl mb-8 border-2 border-blue-100">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span className="text-blue-500">✦</span> about me
+              </h2>
+              <div className="space-y-4 text-gray-700 leading-relaxed">
+                <p>
+                  i'm pursuing a <span className="font-semibold text-blue-600">bachelor of engineering with honours business administration</span> at western university. 
+                  i was awarded the <span className="font-semibold text-teal-600">western scholarship of excellence</span> and accepted into <span className="font-semibold text-teal-600">ivey's advanced entry opportunity (aeo)</span> for the hba dual degree.
+                </p>
+                <p>
+                  i've worked on improving website performance, growing social media audiences, and building educational content that has reached <span className="font-bold text-blue-600">millions of viewers</span> across platforms.
+                </p>
+                <p>
+                  i'm especially passionate about growth strategy, digital marketing, and building scalable online systems that make an impact.
+                </p>
               </div>
-              <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
-                <div className="flex items-center gap-3 mb-2">
-                  <Users className="w-5 h-5 text-green-500" />
-                  <span className="text-slate-400 text-sm">Followers</span>
+            </div>
+          </div>
+        )}
+
+        {/* About Tab */}
+        {activeTab === 'about' && (
+          <div className={`space-y-6 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <h1 className="text-4xl font-bold mb-8 text-gray-800">
+              <span className="text-blue-500">✦</span> more about me
+            </h1>
+
+            {/* Hobbies Section */}
+            <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-blue-100">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <span className="text-blue-500">✦</span> hobbies
+              </h2>
+              
+              {/* Hobbies Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {/* Jiu Jitsu - Video */}
+              <div className="bg-white rounded-3xl overflow-hidden shadow-xl border-2 border-blue-200 hover:scale-105 transition-all duration-300 hover:shadow-2xl cursor-pointer">
+                <div className="aspect-square relative overflow-hidden">
+                  <video 
+                    src="/images/jiujitsu.mp4" 
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  />
                 </div>
-                <div className="text-3xl font-bold">9K+</div>
+                <div className="p-4 text-center">
+                  <h3 className="text-base font-bold text-gray-800">jiu jitsu</h3>
+                </div>
               </div>
-              <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
-                <div className="flex items-center gap-3 mb-2">
-                  <BarChart3 className="w-5 h-5 text-blue-500" />
-                  <span className="text-slate-400 text-sm">Videos Created</span>
+
+              {/* Badminton */}
+              <div className="bg-white rounded-3xl overflow-hidden shadow-xl border-2 border-teal-200 hover:scale-105 transition-all duration-300 hover:shadow-2xl cursor-pointer">
+                <div className="aspect-square relative overflow-hidden">
+                  <img src="/images/badminton.jpg" alt="Badminton" className="w-full h-full object-cover" />
                 </div>
-                <div className="text-3xl font-bold">150+</div>
+                <div className="p-4 text-center">
+                  <h3 className="text-base font-bold text-gray-800">badminton</h3>
+                </div>
+              </div>
+
+              {/* Hockey */}
+              <div className="bg-white rounded-3xl overflow-hidden shadow-xl border-2 border-slate-200 hover:scale-105 transition-all duration-300 hover:shadow-2xl cursor-pointer">
+                <div className="aspect-square relative overflow-hidden">
+                  <img src="/images/hockey.jpg" alt="Hockey" className="w-full h-full object-cover" />
+                </div>
+                <div className="p-4 text-center">
+                  <h3 className="text-base font-bold text-gray-800">hockey</h3>
+                </div>
+              </div>
+
+              {/* Investing */}
+              <div className="bg-white rounded-3xl overflow-hidden shadow-xl border-2 border-teal-200 hover:scale-105 transition-all duration-300 hover:shadow-2xl cursor-pointer">
+                <div className="aspect-square relative overflow-hidden">
+                  <img src="/images/investing.jpg" alt="Investing" className="w-full h-full object-cover" />
+                </div>
+                <div className="p-4 text-center">
+                  <h3 className="text-base font-bold text-gray-800">investing</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+
+            {/* Fun Facts */}
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl p-8 shadow-xl border-2 border-blue-200">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span className="text-blue-500">✦</span> quick facts
+              </h2>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start gap-3">
+                  <span className="text-blue-500 text-xl">→</span>
+                  <span>I speak 2.5 languages (english chinese, and learning french)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-teal-500 text-xl">→</span>
+                  <span>my favourite dish is eggs and tomatoes</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-blue-500 text-xl">→</span>
+                  <span>I enjoy snowboarding in the Rockies (love sunshine)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-blue-600 text-xl">→</span>
+                  <span>chess</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* Projects Tab */}
+        {activeTab === 'projects' && (
+          <div className={`space-y-6 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <h1 className="text-4xl font-bold mb-8 text-gray-800">
+              <span className="text-blue-500">✦</span> projects
+            </h1>
+
+            {/* Project Template */}
+            <div className="bg-white rounded-3xl overflow-hidden shadow-xl border-2 border-blue-100 hover:shadow-2xl transition-all duration-300 hover:scale-105 max-w-2xl mx-auto">
+              <div className="aspect-video bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-6xl mb-4 animate-bounce">🚧</div>
+                  <div className="text-2xl font-bold text-gray-800 mb-2">coming soon...</div>
+                  <div className="text-gray-500">cooking up something cool</div>
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-2">stay tuned!</h3>
+                <p className="text-gray-600 mb-4">
+                  exciting projects in the works. check back soon to see what i'm building!
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="px-3 py-1 bg-blue-100 text-blue-600 text-xs rounded-full font-medium">✨ in progress</span>
+                  <span className="px-3 py-1 bg-teal-100 text-teal-600 text-xs rounded-full font-medium">🔥 coming soon</span>
+                </div>
               </div>
             </div>
           </div>
@@ -219,27 +313,30 @@ const BrokerPortfolio = () => {
 
         {/* Experience Tab */}
         {activeTab === 'experience' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
+            <h1 className="text-4xl font-bold mb-8 text-gray-800">
+              <span className="text-blue-500">✦</span> my experience
+            </h1>
             {experience.map((exp, index) => (
-              <div
+              <div 
                 key={index}
-                className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50 hover:border-cyan-500/50 transition-all"
+                className="bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all border-2 border-blue-100 hover:border-blue-300"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold mb-1">{exp.role}</h3>
-                    <p className="text-cyan-400 font-medium mb-1">{exp.company}</p>
-                    <p className="text-slate-400 text-sm">{exp.location} • {exp.period}</p>
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4 gap-3">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-1">{exp.role}</h3>
+                    <div className="text-lg text-blue-600 font-semibold">{exp.company}</div>
+                    <div className="text-sm text-gray-500">{exp.location} • {exp.period}</div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-green-500">{exp.impact}</div>
-                    <div className="text-xs text-slate-400">{exp.metric}</div>
+                  <div className="bg-gradient-to-br from-teal-50 to-emerald-50 px-4 py-2 rounded-xl border-2 border-teal-200">
+                    <div className="text-2xl font-bold text-teal-600">{exp.impact}</div>
+                    <div className="text-xs text-gray-600">{exp.metric}</div>
                   </div>
                 </div>
                 <ul className="space-y-2">
                   {exp.highlights.map((highlight, idx) => (
-                    <li key={idx} className="text-slate-300 text-sm flex items-start gap-2">
-                      <span className="text-cyan-500 mt-1">•</span>
+                    <li key={idx} className="flex items-start gap-3 text-gray-700">
+                      <ArrowRight className="w-4 h-4 text-blue-500 mt-1 flex-shrink-0" />
                       <span>{highlight}</span>
                     </li>
                   ))}
@@ -249,53 +346,86 @@ const BrokerPortfolio = () => {
           </div>
         )}
 
-        {/* Skills Tab */}
-        {activeTab === 'skills' && (
-          <div className="space-y-4">
-            {skills.map((skill, index) => (
-              <div key={index} className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-medium">{skill.name}</span>
-                  <span className="text-slate-400">{skill.level}%</span>
+        {/* Social Media Tab */}
+        {activeTab === 'media' && (
+          <div className={`transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <h1 className="text-4xl font-bold mb-8 text-gray-800">
+              <span className="text-teal-500">✦</span> social media
+            </h1>
+
+            {/* Featured Content */}
+            <div className="bg-white rounded-3xl overflow-hidden shadow-xl border-2 border-blue-100 mb-8 hover:shadow-2xl transition-all duration-300">
+              <div className="aspect-video overflow-hidden">
+                <img src="/images/featured.jpg" alt="Featured Content" className="w-full h-full object-cover" />
+              </div>
+              <div className="p-8">
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">@ethanzhouwealth</h3>
+                <p className="text-gray-700 mb-4">
+                  creating educational content about investing and personal finance.
+                </p>
+                <div className="flex flex-wrap gap-3 mb-6">
+                  <div className="flex items-center gap-2 bg-teal-50 px-4 py-2 rounded-full border-2 border-teal-200">
+                    <Eye className="w-4 h-4 text-teal-600" />
+                    <span className="text-teal-600 font-semibold">3M+ views</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border-2 border-blue-200">
+                    <Users className="w-4 h-4 text-blue-600" />
+                    <span className="text-blue-600 font-semibold">9K+ followers</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-full border-2 border-slate-200">
+                    <BarChart3 className="w-4 h-4 text-slate-600" />
+                    <span className="text-slate-600 font-semibold">150+ videos</span>
+                  </div>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
-                  <div
-                    className={`h-full ${skill.color} transition-all duration-1000 ease-out`}
-                    style={{ width: mounted ? `${skill.level}%` : '0%' }}
-                  ></div>
+                <div className="flex flex-wrap gap-3">
+                  <a 
+                    href="https://instagram.com/ethanzhouwealth"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-teal-600 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                  >
+                    <Instagram className="w-4 h-4" />
+                    follow on instagram
+                  </a>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* UGC Section */}
+            <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-teal-100">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <span className="text-teal-500">✦</span> user generated content (UGC)
+              </h2>
+              
+              {/* UGC Sample */}
+              <div className="bg-gradient-to-br from-blue-50 to-teal-50 rounded-2xl overflow-hidden border-2 border-blue-100 max-w-md mx-auto">
+                <div className="aspect-video overflow-hidden">
+                  <img src="/images/ugc-sample.jpg" alt="UGC Sample" className="w-full h-full object-cover" />
+                </div>
+                <div className="p-4 text-center">
+                  <div className="text-sm text-gray-700">brand partnership example</div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Contact Section */}
-        <div className="mt-8 bg-gradient-to-br from-cyan-600/10 to-blue-600/10 rounded-2xl p-8 border border-cyan-500/20">
-          <h2 className="text-2xl font-bold mb-4">Let's Connect</h2>
-          <p className="text-slate-400 mb-6">
-            Interested in collaborating on marketing, content, or growth projects? Let's chat!
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <a href="mailto:ethan.st.zhou@gmail.com" className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg transition-all">
-              <Mail className="w-4 h-4" />
-              ethan.st.zhou@gmail.com
+        {/* Footer */}
+        <footer className="mt-16 text-center">
+          <div className="flex justify-center gap-4 mb-4">
+            <a href="mailto:ethan.st.zhou@gmail.com" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Mail className="w-5 h-5" />
             </a>
-            <a href="tel:587-891-2184" className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg transition-all">
-              <Phone className="w-4 h-4" />
-              587-891-2184
+            <a href="https://instagram.com/ethanzhouwealth" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Instagram className="w-5 h-5" />
             </a>
-            <a href="https://instagram.com/ethanzhouwealth" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg transition-all">
-              <Instagram className="w-4 h-4" />
-              @ethanzhouwealth
+            <a href="https://www.linkedin.com/in/ethan-zhou-832565315/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Linkedin className="w-5 h-5" />
             </a>
           </div>
-        </div>
-
-        {/* Footer */}
-        <footer className="mt-8 text-center text-slate-500 text-sm">
-          <p>© 2026 Ethan Zhou</p>
+          <div className="text-sm text-gray-500">© 2026 ethan zhou</div>
         </footer>
-      </div>
+      </header>
     </div>
   );
 };
