@@ -366,11 +366,11 @@ const BrokerPortfolio = () => {
                 <div className="flex flex-wrap gap-3 mb-6">
                   <div className="flex items-center gap-2 bg-teal-50 px-4 py-2 rounded-full border-2 border-teal-200">
                     <Eye className="w-4 h-4 text-teal-600" />
-                    <span className="text-teal-600 font-semibold">3M+ views</span>
+                    <span className="text-teal-600 font-semibold">3M+ total views</span>
                   </div>
                   <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border-2 border-blue-200">
                     <Users className="w-4 h-4 text-blue-600" />
-                    <span className="text-blue-600 font-semibold">9K+ followers</span>
+                    <span className="text-blue-600 font-semibold">9K+ followers on tiktok/insta/yt</span>
                   </div>
                   <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-full border-2 border-slate-200">
                     <BarChart3 className="w-4 h-4 text-slate-600" />
