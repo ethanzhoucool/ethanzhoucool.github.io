@@ -271,7 +271,7 @@ const BrokerPortfolio = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-blue-600 text-xl">→</span>
-                  <span>chess</span>
+                  <span>1400 rapid chess - <a href="https://www.chess.com/member/xxhyperinsanexx" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 font-semibold underline">challenge me!</a></span>
                 </li>
               </ul>
             </div>
@@ -367,7 +367,7 @@ const BrokerPortfolio = () => {
                   </div>
                   <div className="flex items-center gap-2 bg-blue-50 px-3 sm:px-4 py-2 rounded-full border-2 border-blue-200">
                     <Users className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                    <span className="text-blue-600 font-semibold text-xs sm:text-sm">9K+ followers</span>
+                    <span className="text-blue-600 font-semibold text-xs sm:text-sm">9K+ across tiktok/insta/yt</span>
                   </div>
                   <div className="flex items-center gap-2 bg-slate-50 px-3 sm:px-4 py-2 rounded-full border-2 border-slate-200">
                     <BarChart3 className="w-4 h-4 text-slate-600 flex-shrink-0" />
