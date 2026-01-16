@@ -388,20 +388,24 @@ const BrokerPortfolio = () => {
               </div>
             </div>
 
-            {/* UGC Section */}
+            {/* Brands Section */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-teal-100">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
-                <span className="text-teal-500">✦</span> user generated content (UGC)
+                <span className="text-teal-500">✦</span> brands i've worked with
               </h2>
               
-              {/* UGC Sample */}
-              <div className="bg-gradient-to-br from-blue-50 to-teal-50 rounded-2xl overflow-hidden border-2 border-blue-100 max-w-md mx-auto">
-                <div className="aspect-video overflow-hidden">
-                  <img src="/images/ugc-sample.jpg" alt="UGC Sample" className="w-full h-full object-cover" />
+              {/* Brand Logos Grid */}
+              <div className="flex justify-center items-center gap-6 flex-wrap">
+                {/* Turbo Logo */}
+                <div className="rounded-2xl overflow-hidden w-32 h-32 hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                  <img src="/images/turbo-logo.png" alt="Turbo" className="w-full h-full object-cover" />
                 </div>
-                <div className="p-4 text-center">
-                  <div className="text-sm text-gray-700">brand partnership example</div>
-                </div>
+                
+                {/* Add more brands here in the future - just duplicate the div above */}
+              </div>
+              
+              <div className="mt-6 text-center text-sm text-gray-500">
+                interested in partnering? <a href="mailto:ethan.st.zhou@gmail.com" className="text-blue-600 hover:text-blue-700 font-semibold">let's chat!</a>
               </div>
             </div>
           </div>
