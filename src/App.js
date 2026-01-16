@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Users, Eye, Mail, Instagram, Linkedin, BarChart3, Activity, Sparkles, ArrowRight } from 'lucide-react';
+import { Users, Eye, Mail, Instagram, Linkedin, BarChart3, Sparkles, ArrowRight } from 'lucide-react';
 
 const BrokerPortfolio = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [mounted, setMounted] = useState(false);
-  const [hoveredStat, setHoveredStat] = useState(null);
   const [typedText, setTypedText] = useState('');
   const fullText = 'ethan!';
 
