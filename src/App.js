@@ -293,10 +293,13 @@ const BrokerPortfolio = () => {
                 className="block"
               >
                 <div className="aspect-video bg-gradient-to-br from-blue-100 to-teal-100 overflow-hidden">
-                  <img 
-                    src="/images/explain-my-code.png" 
-                    alt="Explain My Code Screenshot" 
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  <video 
+                    src="/images/explain-my-code.mp4" 
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
                   />
                 </div>
               </a>
