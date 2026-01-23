@@ -284,24 +284,41 @@ const BrokerPortfolio = () => {
               <span className="text-blue-500">✦</span> projects
             </h1>
 
-            {/* Project Template */}
+            {/* Explain My Code Project */}
             <div className="bg-white rounded-3xl overflow-hidden shadow-xl border-2 border-blue-100 hover:shadow-2xl transition-all duration-300 hover:scale-105 max-w-2xl mx-auto">
-              <div className="aspect-video bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center px-4">
-                <div className="text-center">
-                  <div className="text-5xl sm:text-6xl mb-3 sm:mb-4 animate-bounce">🚧</div>
-                  <div className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">coming soon...</div>
-                  <div className="text-sm sm:text-base text-gray-500">cooking up something cool</div>
+              <a 
+                href="https://explain-my-code-w3sj.onrender.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <div className="aspect-video bg-gradient-to-br from-blue-100 to-teal-100 overflow-hidden">
+                  <img 
+                    src="/images/explain-my-code.png" 
+                    alt="Explain My Code Screenshot" 
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
-              </div>
+              </a>
               <div className="p-4 sm:p-6">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">stay tuned!</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">Explain my Code</h3>
                 <p className="text-sm sm:text-base text-gray-600 mb-4">
-                  exciting projects in the works. check back soon to see what i'm building!
+                  can explain a code to a 5 year old
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-600 text-xs rounded-full font-medium">✨ in progress</span>
-                  <span className="px-3 py-1 bg-teal-100 text-teal-600 text-xs rounded-full font-medium">🔥 coming soon</span>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-3 py-1 bg-blue-100 text-blue-600 text-xs rounded-full font-medium">AI</span>
+                  <span className="px-3 py-1 bg-teal-100 text-teal-600 text-xs rounded-full font-medium">Education</span>
+                  <span className="px-3 py-1 bg-purple-100 text-purple-600 text-xs rounded-full font-medium">Web App</span>
                 </div>
+                <a 
+                  href="https://explain-my-code-w3sj.onrender.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+                >
+                  visit project
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </div>
