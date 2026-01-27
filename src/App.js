@@ -85,6 +85,7 @@ const BrokerPortfolio = () => {
             >
               projects
             </button>
+            {/* Experience tab hidden for now
             <button 
               onClick={() => setActiveTab('experience')} 
               className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 text-sm ${
@@ -95,6 +96,7 @@ const BrokerPortfolio = () => {
             >
               experience
             </button>
+            */}
             <button 
               onClick={() => setActiveTab('media')} 
               className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 text-sm whitespace-nowrap ${
@@ -141,7 +143,7 @@ const BrokerPortfolio = () => {
               {/* Connect Buttons */}
               <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 mb-12 px-4">
                 <a 
-                  href="mailto:ethan.st.zhou@gmail.com"
+                  href="mailto:info@ethanzhou.ca"
                   className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-teal-600 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all hover:scale-105"
                 >
                   <Mail className="w-4 h-4" />
@@ -416,15 +418,20 @@ const BrokerPortfolio = () => {
               {/* Brand Logos Grid */}
               <div className="flex justify-center items-center gap-6 flex-wrap">
                 {/* Turbo Logo */}
-                <div className="rounded-2xl overflow-hidden w-32 h-32 hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                <a 
+                  href="https://turbo.ai" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="rounded-2xl overflow-hidden w-32 h-32 hover:scale-105 transition-all duration-300 hover:shadow-lg"
+                >
                   <img src="/images/turbo-logo.png" alt="Turbo" className="w-full h-full object-cover" />
-                </div>
+                </a>
                 
                 {/* Add more brands here in the future - just duplicate the div above */}
               </div>
               
               <div className="mt-6 text-center text-sm text-gray-500">
-                interested in partnering? <a href="mailto:ethan.st.zhou@gmail.com" className="text-blue-600 hover:text-blue-700 font-semibold">let's chat!</a>
+                interested in partnering? <a href="mailto:info@ethanzhou.ca" className="text-blue-600 hover:text-blue-700 font-semibold">let's chat!</a>
               </div>
             </div>
           </div>
@@ -433,7 +440,7 @@ const BrokerPortfolio = () => {
         {/* Footer */}
         <footer className="mt-16 text-center">
           <div className="flex justify-center gap-4 mb-4">
-            <a href="mailto:ethan.st.zhou@gmail.com" className="text-gray-600 hover:text-blue-600 transition-colors">
+            <a href="mailto:info@ethanzhou.ca" className="text-gray-600 hover:text-blue-600 transition-colors">
               <Mail className="w-5 h-5" />
             </a>
             <a href="https://instagram.com/ethanzhouwealth" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-blue-600 transition-colors">
