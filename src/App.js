@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Eye, Mail, Instagram, Linkedin, BarChart3, Sparkles, ArrowRight, Sun, Moon } from 'lucide-react';
+import { Users, Eye, Mail, Instagram, Linkedin, Youtube, BarChart3, Sparkles, ArrowRight, Sun, Moon } from 'lucide-react';
 
 const Portfolio = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -75,12 +75,12 @@ const Portfolio = () => {
       company: '@ethanzhouwealth',
       period: 'August 2023 – Present',
       location: 'Instagram & TikTok',
-      impact: '3M+',
+      impact: '5M+',
       metric: 'Total Views',
       highlights: [
         'Created 150+ educational finance videos',
-        'Generated 3M+ views across platforms',
-        'Built audience of 9,000+ followers',
+        'Generated 5M+ views across platforms',
+        'Built audience of 20,000+ followers',
         'Focus on investing & personal finance'
       ]
     }
@@ -440,11 +440,11 @@ const Portfolio = () => {
                 <div className="flex flex-wrap gap-3 mb-6">
                   <div className="flex items-center gap-2 bg-teal-50 dark:bg-teal-900/20 px-3 sm:px-4 py-2 rounded-full border-2 border-teal-200 dark:border-teal-800">
                     <Eye className="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0" />
-                    <span className="text-teal-600 dark:text-teal-400 font-semibold text-xs sm:text-sm">3M+ total views</span>
+                    <span className="text-teal-600 dark:text-teal-400 font-semibold text-xs sm:text-sm">5M+ total views</span>
                   </div>
                   <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-3 sm:px-4 py-2 rounded-full border-2 border-blue-200 dark:border-blue-800">
                     <Users className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                    <span className="text-blue-600 dark:text-blue-400 font-semibold text-xs sm:text-sm">9K+ across tiktok/insta/yt</span>
+                    <span className="text-blue-600 dark:text-blue-400 font-semibold text-xs sm:text-sm">20K+ across tiktok/insta/yt</span>
                   </div>
                   <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/30 px-3 sm:px-4 py-2 rounded-full border-2 border-slate-200 dark:border-slate-700">
                     <BarChart3 className="w-4 h-4 text-slate-600 dark:text-slate-400 flex-shrink-0" />
@@ -460,6 +460,15 @@ const Portfolio = () => {
                   >
                     <Instagram className="w-4 h-4" />
                     follow on instagram
+                  </a>
+                  <a 
+                    href="https://www.youtube.com/@Ethanzhouwealth"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                  >
+                    <Youtube className="w-4 h-4" />
+                    subscribe on youtube
                   </a>
                 </div>
               </div>
@@ -502,11 +511,14 @@ const Portfolio = () => {
             <a href="https://instagram.com/ethanzhouwealth" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               <Instagram className="w-5 h-5" />
             </a>
+            <a href="https://www.youtube.com/@Ethanzhouwealth" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+              <Youtube className="w-5 h-5" />
+            </a>
             <a href="https://www.linkedin.com/in/ethan-zhou-832565315/" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               <Linkedin className="w-5 h-5" />
             </a>
           </div>
-          <div className="text-sm text-gray-500 dark:text-gray-600" title="hand-coded with ❤️ and way too much coffee">© 2026 ethan zhou</div>
+          <div className="text-sm text-gray-500 dark:text-gray-600">© 2026 ethan zhou</div>
         </footer>
       </header>
     </div>
