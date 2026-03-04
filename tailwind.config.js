@@ -5,7 +5,12 @@ module.exports = {
   ],
   darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        caveat: ['Caveat', 'cursive'],
+        inter: ['Inter', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 }
