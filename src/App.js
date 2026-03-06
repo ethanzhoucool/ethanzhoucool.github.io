@@ -422,79 +422,154 @@ const Portfolio = () => {
 
         {/* ═══ ABOUT ═══ */}
         {activeTab === 'about' && (
-          <div className="space-y-6">
-            <StaggerContainer stagger={0.13}>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-slate-800 dark:text-slate-100">
-              <span className="text-blue-500 dark:text-blue-400">✦</span> about me
-            </h1>
+          <div className="space-y-8 sm:space-y-12 max-w-2xl mx-auto">
 
-            <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-100 dark:border-slate-800">
-              <div className="space-y-3 sm:space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed text-sm sm:text-base">
-                <p>
-                  i'm pursuing a <span className="font-semibold text-blue-600 dark:text-blue-400">bachelor of engineering with honours business administration</span> at western university. 
-                  i was awarded the <span className="font-semibold text-teal-600 dark:text-teal-400">western scholarship of excellence</span> and accepted into <span className="font-semibold text-teal-600 dark:text-teal-400">ivey's advanced entry opportunity (aeo)</span> for the hba dual degree.
+            {/* Page heading */}
+            <div className="stagger-item" style={{ animationDelay: '0s' }}>
+              <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100">
+                <span className="text-blue-500 dark:text-blue-400">✦</span> about me
+              </h1>
+            </div>
+
+            {/* ── Hero Quote ── */}
+            <div className="stagger-item" style={{ animationDelay: '0.12s' }}>
+              <blockquote className="relative py-8 sm:py-12 px-6 sm:px-10 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 shadow-md">
+                <div className="absolute top-4 left-6 sm:left-8 text-6xl sm:text-7xl font-playfair text-slate-200 dark:text-slate-700 leading-none select-none" aria-hidden="true">"</div>
+                <p className="relative font-playfair text-xl sm:text-2xl md:text-3xl text-slate-800 dark:text-slate-100 leading-snug sm:leading-relaxed text-center font-medium">
+                  <span className="font-semibold text-blue-600 dark:text-blue-400">Asymmetric risk</span>: taking a risk where the potential return far exceeds the risk taken."
                 </p>
-                <p>
-                  i've worked on improving website performance, growing social media audiences, and building educational content that has reached <span className="font-bold text-blue-600 dark:text-blue-400">millions of viewers</span> across platforms.
-                </p>
-                <p>
-                  i'm especially passionate about growth strategy, digital marketing, and building scalable online systems that make an impact.
+              </blockquote>
+            </div>
+
+            {/* ── Body ── */}
+            <div className="stagger-item space-y-6 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed sm:leading-loose" style={{ animationDelay: '0.24s' }}>
+              <p>
+                I'm obsessed with this idea.
+              </p>
+            </div>
+
+            {/* Judo quote — left-accent callout */}
+            <div className="stagger-item" style={{ animationDelay: '0.36s' }}>
+              <div className="border-l-4 border-teal-500 dark:border-teal-400 pl-5 sm:pl-6 py-1">
+                <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base mb-1">It's similar to a concept we use in Judo:</p>
+                <p className="font-playfair italic text-lg sm:text-xl text-slate-700 dark:text-slate-200">
+                  "minimum effort — maximum efficiency"
                 </p>
               </div>
             </div>
 
-            {/* Hobbies */}
-            <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-100 dark:border-slate-800">
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 flex items-center gap-2">
-                <span className="text-blue-500 dark:text-blue-400">✦</span> hobbies
-              </h2>
-              
-              <div className="grid grid-cols-2 gap-3 sm:gap-5">
-                {[
-                  { type: 'video', src: '/images/jiujitsu.mp4', label: 'jiu jitsu' },
-                  { type: 'img', src: '/images/badminton.jpg', label: 'badminton' },
-                  { type: 'img', src: '/images/hockey.jpg', label: 'hockey' },
-                  { type: 'img', src: '/images/investing.jpg', label: 'investing' },
-                ].map((hobby, i) => (
-                  <div key={hobby.label} className="stagger-item bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow duration-300" style={{ animationDelay: `${0.4 + i * 0.1}s` }}>
-                    <div className="aspect-square relative overflow-hidden">
-                      {hobby.type === 'video' ? (
-                        <video src={hobby.src} className="w-full h-full object-cover" autoPlay loop muted playsInline />
-                      ) : (
-                        <img src={hobby.src} alt={hobby.label} className="w-full h-full object-cover" />
-                      )}
-                    </div>
-                    <div className="p-3 sm:p-4 text-center">
-                      <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">{hobby.label}</h3>
-                    </div>
-                  </div>
-                ))}
+            <div className="stagger-item space-y-6 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed sm:leading-loose" style={{ animationDelay: '0.48s' }}>
+              <p>
+                The ultimate concept between these two ideas is <strong className="text-slate-800 dark:text-slate-100 font-semibold">leverage</strong>.
+              </p>
+              <p>
+                Every action should maximize the ratio of results to effort. It's about placing small bets where the upside is enormous and the downside is negligible.
+              </p>
+            </div>
+
+            {/* ── Worst / Best case examples ── */}
+            <div className="stagger-item space-y-5" style={{ animationDelay: '0.6s' }}>
+              {/* Example 1 */}
+              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 p-5 sm:p-6">
+                <p className="text-slate-700 dark:text-slate-200 text-base sm:text-lg font-medium mb-3">Send an email to someone you admire.</p>
+                <div className="space-y-1.5 text-sm sm:text-base">
+                  <p><span className="font-semibold text-slate-400 dark:text-slate-500">Worst case:</span> <span className="text-slate-500 dark:text-slate-400">they ignore it.</span></p>
+                  <p><span className="font-semibold text-blue-600 dark:text-blue-400">Best case:</span> <span className="text-slate-700 dark:text-slate-200">it changes your career.</span></p>
+                </div>
+              </div>
+              {/* Example 2 */}
+              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 p-5 sm:p-6">
+                <p className="text-slate-700 dark:text-slate-200 text-base sm:text-lg font-medium mb-3">Publish your ideas online.</p>
+                <div className="space-y-1.5 text-sm sm:text-base">
+                  <p><span className="font-semibold text-slate-400 dark:text-slate-500">Worst case:</span> <span className="text-slate-500 dark:text-slate-400">no one reads them.</span></p>
+                  <p><span className="font-semibold text-blue-600 dark:text-blue-400">Best case:</span> <span className="text-slate-700 dark:text-slate-200">the right person does.</span></p>
+                </div>
               </div>
             </div>
 
-            {/* Quick Facts */}
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-100 dark:border-slate-800">
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span className="text-blue-500 dark:text-blue-400">✦</span> quick facts
-              </h2>
-              <ul className="space-y-2 text-slate-700 dark:text-slate-300 text-sm sm:text-base">
-                {[
-                  { color: 'blue', text: 'I speak 2.5 languages (english chinese, and learning french)' },
-                  { color: 'teal', text: 'my favourite dish is eggs and tomatoes' },
-                  { color: 'blue', text: 'I enjoy snowboarding in the Rockies (love sunshine)' },
-                ].map((fact, i) => (
-                  <li key={i} className="stagger-item flex items-start gap-3" style={{ animationDelay: `${0.7 + i * 0.1}s` }}>
-                    <span className={`text-${fact.color}-500 dark:text-${fact.color}-400 text-xl`}>→</span>
-                    <span>{fact.text}</span>
+            {/* ── Closing paragraphs ── */}
+            <div className="stagger-item space-y-6 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed sm:leading-loose" style={{ animationDelay: '0.72s' }}>
+              <p>
+                The strange thing is that these opportunities are everywhere.
+              </p>
+              <p>
+                But most people don't take them. Not because they can't — because it's <strong className="text-slate-800 dark:text-slate-100 font-semibold">uncomfortable</strong>. So they choose the <em className="text-slate-500 dark:text-slate-400">status quo</em>.
+              </p>
+              <p>
+                And doing nothing is the most symmetric bet you can make: limited downside, limited upside.
+              </p>
+            </div>
+
+            {/* ── Closing statement ── */}
+            <div className="stagger-item" style={{ animationDelay: '0.84s' }}>
+              <p className="font-playfair text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-800 dark:text-slate-100 text-center py-4">
+                I'd rather take <span className="text-blue-600 dark:text-blue-400">asymmetric</span> bets.
+              </p>
+            </div>
+
+            {/* ── Divider ── */}
+            <div className="stagger-item flex justify-center" style={{ animationDelay: '0.96s' }}>
+              <div className="w-12 h-px bg-slate-300 dark:bg-slate-700"></div>
+            </div>
+
+            {/* ── Hobbies ── */}
+            <div className="stagger-item" style={{ animationDelay: '1.05s' }}>
+              <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-100 dark:border-slate-800">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 flex items-center gap-2">
+                  <span className="text-blue-500 dark:text-blue-400">✦</span> hobbies
+                </h2>
+                
+                <div className="grid grid-cols-2 gap-3 sm:gap-5">
+                  {[
+                    { type: 'video', src: '/images/jiujitsu.mp4', label: 'jiu jitsu' },
+                    { type: 'img', src: '/images/badminton.jpg', label: 'badminton' },
+                    { type: 'img', src: '/images/hockey.jpg', label: 'hockey' },
+                    { type: 'img', src: '/images/investing.jpg', label: 'investing' },
+                  ].map((hobby, i) => (
+                    <div key={hobby.label} className="stagger-item bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow duration-300" style={{ animationDelay: `${1.1 + i * 0.08}s` }}>
+                      <div className="aspect-square relative overflow-hidden">
+                        {hobby.type === 'video' ? (
+                          <video src={hobby.src} className="w-full h-full object-cover" autoPlay loop muted playsInline />
+                        ) : (
+                          <img src={hobby.src} alt={hobby.label} className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                      <div className="p-3 sm:p-4 text-center">
+                        <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">{hobby.label}</h3>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Quick Facts ── */}
+            <div className="stagger-item" style={{ animationDelay: '1.2s' }}>
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-100 dark:border-slate-800">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+                  <span className="text-blue-500 dark:text-blue-400">✦</span> quick facts
+                </h2>
+                <ul className="space-y-2 text-slate-700 dark:text-slate-300 text-sm sm:text-base">
+                  <li className="flex items-start gap-3">
+                    <span className="text-blue-500 dark:text-blue-400 text-xl">→</span>
+                    <span>I speak 2.5 languages (english, chinese, and learning french)</span>
                   </li>
-                ))}
-                <li className="stagger-item flex items-start gap-3" style={{ animationDelay: '1.0s' }}>
-                  <span className="text-blue-600 dark:text-blue-400 text-xl">→</span>
-                  <span>1400 rapid chess - <a href="https://www.chess.com/member/xxhyperinsanexx" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline" data-hover>challenge me!</a></span>
-                </li>
-              </ul>
+                  <li className="flex items-start gap-3">
+                    <span className="text-teal-500 dark:text-teal-400 text-xl">→</span>
+                    <span>my favourite dish is eggs and tomatoes</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-blue-500 dark:text-blue-400 text-xl">→</span>
+                    <span>I enjoy snowboarding in the Rockies (love sunshine)</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-blue-600 dark:text-blue-400 text-xl">→</span>
+                    <span>1400 rapid chess - <a href="https://www.chess.com/member/xxhyperinsanexx" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline" data-hover>challenge me!</a></span>
+                  </li>
+                </ul>
+              </div>
             </div>
-            </StaggerContainer>
+
           </div>
         )}
 

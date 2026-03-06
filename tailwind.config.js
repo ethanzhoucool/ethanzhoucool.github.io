@@ -9,6 +9,7 @@ module.exports = {
       fontFamily: {
         caveat: ['Caveat', 'cursive'],
         inter: ['Inter', 'sans-serif'],
+        playfair: ['Playfair Display', 'serif'],
       },
     },
   },
