@@ -155,6 +155,22 @@ const ProximityText = ({ text, className = '' }) => {
   );
 };
 
+/* ─── Stagger wrapper — auto-staggers children on mount ─── */
+const StaggerContainer = ({ children, baseDelay = 0, stagger = 0.12 }) => {
+  return (
+    <>
+      {React.Children.map(children, (child, i) => {
+        if (!React.isValidElement(child)) return child;
+        return (
+          <div className="stagger-item" style={{ animationDelay: `${baseDelay + i * stagger}s` }}>
+            {child}
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
 /* ─── Flip card photo component ─── */
 const FlipPhoto = () => {
   const cardRef = useRef(null);
@@ -404,9 +420,10 @@ const Portfolio = () => {
           </div>
         )}
 
-        {/* ═══ ABOUT — preserved ═══ */}
+        {/* ═══ ABOUT ═══ */}
         {activeTab === 'about' && (
-          <div className={`space-y-6 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="space-y-6">
+            <StaggerContainer stagger={0.13}>
             <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-slate-800 dark:text-slate-100">
               <span className="text-blue-500 dark:text-blue-400">✦</span> about me
             </h1>
@@ -433,38 +450,25 @@ const Portfolio = () => {
               </h2>
               
               <div className="grid grid-cols-2 gap-3 sm:gap-5">
-                <div className="bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow duration-300">
-                  <div className="aspect-square relative overflow-hidden">
-                    <video src="/images/jiujitsu.mp4" className="w-full h-full object-cover" autoPlay loop muted playsInline />
+                {[
+                  { type: 'video', src: '/images/jiujitsu.mp4', label: 'jiu jitsu' },
+                  { type: 'img', src: '/images/badminton.jpg', label: 'badminton' },
+                  { type: 'img', src: '/images/hockey.jpg', label: 'hockey' },
+                  { type: 'img', src: '/images/investing.jpg', label: 'investing' },
+                ].map((hobby, i) => (
+                  <div key={hobby.label} className="stagger-item bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow duration-300" style={{ animationDelay: `${0.4 + i * 0.1}s` }}>
+                    <div className="aspect-square relative overflow-hidden">
+                      {hobby.type === 'video' ? (
+                        <video src={hobby.src} className="w-full h-full object-cover" autoPlay loop muted playsInline />
+                      ) : (
+                        <img src={hobby.src} alt={hobby.label} className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                    <div className="p-3 sm:p-4 text-center">
+                      <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">{hobby.label}</h3>
+                    </div>
                   </div>
-                  <div className="p-3 sm:p-4 text-center">
-                    <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">jiu jitsu</h3>
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow duration-300">
-                  <div className="aspect-square relative overflow-hidden">
-                    <img src="/images/badminton.jpg" alt="Badminton" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="p-3 sm:p-4 text-center">
-                    <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">badminton</h3>
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow duration-300">
-                  <div className="aspect-square relative overflow-hidden">
-                    <img src="/images/hockey.jpg" alt="Hockey" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="p-3 sm:p-4 text-center">
-                    <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">hockey</h3>
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow duration-300">
-                  <div className="aspect-square relative overflow-hidden">
-                    <img src="/images/investing.jpg" alt="Investing" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="p-3 sm:p-4 text-center">
-                    <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">investing</h3>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -474,30 +478,30 @@ const Portfolio = () => {
                 <span className="text-blue-500 dark:text-blue-400">✦</span> quick facts
               </h2>
               <ul className="space-y-2 text-slate-700 dark:text-slate-300 text-sm sm:text-base">
-                <li className="flex items-start gap-3">
-                  <span className="text-blue-500 dark:text-blue-400 text-xl">→</span>
-                  <span>I speak 2.5 languages (english chinese, and learning french)</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-teal-500 dark:text-teal-400 text-xl">→</span>
-                  <span>my favourite dish is eggs and tomatoes</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-blue-500 dark:text-blue-400 text-xl">→</span>
-                  <span>I enjoy snowboarding in the Rockies (love sunshine)</span>
-                </li>
-                <li className="flex items-start gap-3">
+                {[
+                  { color: 'blue', text: 'I speak 2.5 languages (english chinese, and learning french)' },
+                  { color: 'teal', text: 'my favourite dish is eggs and tomatoes' },
+                  { color: 'blue', text: 'I enjoy snowboarding in the Rockies (love sunshine)' },
+                ].map((fact, i) => (
+                  <li key={i} className="stagger-item flex items-start gap-3" style={{ animationDelay: `${0.7 + i * 0.1}s` }}>
+                    <span className={`text-${fact.color}-500 dark:text-${fact.color}-400 text-xl`}>→</span>
+                    <span>{fact.text}</span>
+                  </li>
+                ))}
+                <li className="stagger-item flex items-start gap-3" style={{ animationDelay: '1.0s' }}>
                   <span className="text-blue-600 dark:text-blue-400 text-xl">→</span>
                   <span>1400 rapid chess - <a href="https://www.chess.com/member/xxhyperinsanexx" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline" data-hover>challenge me!</a></span>
                 </li>
               </ul>
             </div>
+            </StaggerContainer>
           </div>
         )}
 
-        {/* ═══ PROJECTS — preserved ═══ */}
+        {/* ═══ PROJECTS ═══ */}
         {activeTab === 'projects' && (
-          <div className={`space-y-6 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="space-y-6">
+            <StaggerContainer stagger={0.15}>
             <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-slate-800 dark:text-slate-100">
               <span className="text-blue-500 dark:text-blue-400">✦</span> projects
             </h1>
@@ -524,17 +528,20 @@ const Portfolio = () => {
                 </a>
               </div>
             </div>
+            </StaggerContainer>
           </div>
         )}
 
-        {/* ═══ EXPERIENCE (hidden tab, preserved) ═══ */}
+        {/* ═══ EXPERIENCE (hidden tab) ═══ */}
         {activeTab === 'experience' && (
           <div className="space-y-6">
-            <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-slate-800 dark:text-slate-100">
-              <span className="text-blue-500 dark:text-blue-400">✦</span> my experience
-            </h1>
+            <div className="stagger-item" style={{ animationDelay: '0s' }}>
+              <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-slate-800 dark:text-slate-100">
+                <span className="text-blue-500 dark:text-blue-400">✦</span> my experience
+              </h1>
+            </div>
             {experience.map((exp, index) => (
-              <div key={index} className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md hover:shadow-lg transition-shadow duration-300 border border-slate-100 dark:border-slate-800">
+              <div key={index} className="stagger-item bg-white dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md hover:shadow-lg transition-shadow duration-300 border border-slate-100 dark:border-slate-800" style={{ animationDelay: `${0.1 + index * 0.15}s` }}>
                 <div className="flex flex-col gap-3 mb-4">
                   <div>
                     <h3 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">{exp.role}</h3>
@@ -559,9 +566,10 @@ const Portfolio = () => {
           </div>
         )}
 
-        {/* ═══ SOCIAL MEDIA — preserved ═══ */}
+        {/* ═══ SOCIAL MEDIA ═══ */}
         {activeTab === 'media' && (
-          <div className={`transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div>
+            <StaggerContainer stagger={0.13}>
             <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-slate-800 dark:text-slate-100">
               <span className="text-teal-500 dark:text-teal-400">✦</span> social media
             </h1>
@@ -616,6 +624,7 @@ const Portfolio = () => {
                 interested in partnering? <a href="mailto:info@ethanzhou.ca" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold" data-hover>let's chat!</a>
               </div>
             </div>
+            </StaggerContainer>
           </div>
         )}
 
