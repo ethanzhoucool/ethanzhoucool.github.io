@@ -435,8 +435,9 @@ const Portfolio = () => {
             <div className="stagger-item" style={{ animationDelay: '0.12s' }}>
               <blockquote className="relative py-8 sm:py-12 px-6 sm:px-10 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 shadow-md">
                 <div className="absolute top-4 left-6 sm:left-8 text-6xl sm:text-7xl font-playfair text-slate-200 dark:text-slate-700 leading-none select-none" aria-hidden="true">&ldquo;</div>
+                <div className="absolute bottom-4 right-6 sm:right-8 text-6xl sm:text-7xl font-playfair text-slate-200 dark:text-slate-700 leading-none select-none" aria-hidden="true">&rdquo;</div>
                 <p className="relative font-playfair text-xl sm:text-2xl md:text-3xl text-slate-800 dark:text-slate-100 leading-snug sm:leading-relaxed text-center font-medium">
-                  <span className="font-semibold text-blue-600 dark:text-blue-400">Asymmetric risk</span>: taking a risk where the potential return far exceeds the risk taken.&rdquo;
+                  <span className="font-semibold text-blue-600 dark:text-blue-400">Asymmetric risk</span>: taking a risk where the potential return far exceeds the risk taken.
                 </p>
               </blockquote>
             </div>
