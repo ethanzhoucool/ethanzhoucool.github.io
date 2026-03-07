@@ -434,9 +434,9 @@ const Portfolio = () => {
             {/* ── Hero Quote ── */}
             <div className="stagger-item" style={{ animationDelay: '0.12s' }}>
               <blockquote className="relative py-8 sm:py-12 px-6 sm:px-10 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 shadow-md">
-                <div className="absolute top-4 left-6 sm:left-8 text-6xl sm:text-7xl font-playfair text-slate-200 dark:text-slate-700 leading-none select-none" aria-hidden="true">"</div>
+                <div className="absolute top-4 left-6 sm:left-8 text-6xl sm:text-7xl font-playfair text-slate-200 dark:text-slate-700 leading-none select-none" aria-hidden="true">&ldquo;</div>
                 <p className="relative font-playfair text-xl sm:text-2xl md:text-3xl text-slate-800 dark:text-slate-100 leading-snug sm:leading-relaxed text-center font-medium">
-                  <span className="font-semibold text-blue-600 dark:text-blue-400">Asymmetric risk</span>: taking a risk where the potential return far exceeds the risk taken."
+                  <span className="font-semibold text-blue-600 dark:text-blue-400">Asymmetric risk</span>: taking a risk where the potential return far exceeds the risk taken.&rdquo;
                 </p>
               </blockquote>
             </div>
@@ -503,7 +503,7 @@ const Portfolio = () => {
             {/* ── Closing statement ── */}
             <div className="stagger-item" style={{ animationDelay: '0.84s' }}>
               <p className="font-playfair text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-800 dark:text-slate-100 text-center py-4">
-                I'd rather take <span className="text-blue-600 dark:text-blue-400">asymmetric</span> bets.
+                I'd rather take <span className="text-blue-600 dark:text-blue-400">asymmetric</span> risks.
               </p>
             </div>
 
