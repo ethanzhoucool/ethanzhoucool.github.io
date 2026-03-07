@@ -454,7 +454,7 @@ const Portfolio = () => {
               <div className="border-l-4 border-teal-500 dark:border-teal-400 pl-5 sm:pl-6 py-1">
                 <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base mb-1">It's similar to a concept we use in Judo:</p>
                 <p className="font-playfair italic text-lg sm:text-xl text-slate-700 dark:text-slate-200">
-                  "minimum effort — maximum efficiency"
+                  "maximum efficient use of energy"
                 </p>
               </div>
             </div>
