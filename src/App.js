@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, useSpring } from 'framer-motion';
 import { Users, Eye, Mail, Instagram, Linkedin, Youtube, BarChart3, ArrowRight, Sun, Moon } from 'lucide-react';
 
 /* ─── Scroll-reveal section wrapper — scroll-progress driven ─── */
@@ -38,6 +38,114 @@ const SlideCard = ({ children, from = 'left', delay = 0, className = '' }) => {
         {children}
       </motion.div>
     </div>
+  );
+};
+
+/* ─── Obsession statement — sticky scroll-locked word reveal ─── */
+const ObsessionWord = ({ word, progress, index, total }) => {
+  const start = 0.15 + (index / total) * 0.55;
+  const end = start + 0.55 / total;
+  const opacity = useTransform(progress, [start, end], [0, 1]);
+  const y = useTransform(progress, [start, end], [25, 0]);
+  const blur = useTransform(progress, [start, end], [8, 0]);
+  const filter = useTransform(blur, (v) => `blur(${v}px)`);
+
+  // Shimmer effect for "obsessed" - scroll-driven
+  const shimmerPos = useTransform(progress, [0.6, 0.85], [-200, 200]);
+  const backgroundPosition = useTransform(shimmerPos, (v) => `${v}% center`);
+
+  return (
+    <motion.span
+      style={{
+        opacity,
+        y,
+        filter,
+        ...(word === 'obsessed' && { backgroundPosition }),
+      }}
+      className={word === 'obsessed' ? 'obsession-shimmer font-semibold' : ''}
+    >
+      {word}
+    </motion.span>
+  );
+};
+
+const ObsessionStatement = () => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start start', 'end start'],
+  });
+
+  const words = ["I'm", 'obsessed', 'with', 'this', 'idea.'];
+
+  return (
+    <div ref={ref} className="relative h-[325vh]">
+      <div className="sticky top-0 h-screen flex items-center justify-center px-6">
+        <p className="text-2xl sm:text-3xl md:text-4xl text-slate-800 dark:text-slate-100 text-center font-medium leading-snug flex flex-wrap justify-center gap-x-[0.3em] max-w-2xl">
+          {words.map((word, i) => (
+            <ObsessionWord key={i} word={word} progress={scrollYProgress} index={i} total={words.length} />
+          ))}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Judo quote — sticky scroll-locked character reveal with brush underline ─── */
+const JudoQuote = () => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start start', 'end start'],
+  });
+
+  const introOpacity = useTransform(scrollYProgress, [0.05, 0.2], [0, 1]);
+  const introY = useTransform(scrollYProgress, [0.05, 0.2], [15, 0]);
+
+  const quote = '"maximum efficient use of energy"';
+  const chars = quote.split('');
+
+  /* Brush underline draws in after text is revealed */
+  const underlineScale = useTransform(scrollYProgress, [0.7, 0.85], [0, 1]);
+  const smoothUnderline = useSpring(underlineScale, { stiffness: 120, damping: 30 });
+
+  return (
+    <div ref={ref} className="relative h-[375vh]">
+      <div className="sticky top-0 h-screen flex items-center justify-center px-6">
+        <div className="text-center space-y-4 sm:space-y-6 max-w-2xl">
+          <motion.p
+            style={{ opacity: introOpacity, y: introY }}
+            className="text-slate-500 dark:text-slate-400 text-sm sm:text-base md:text-lg"
+          >
+            It's similar to a concept we use in Judo:
+          </motion.p>
+          <p className="font-playfair italic text-2xl sm:text-3xl md:text-4xl text-slate-700 dark:text-slate-200 leading-snug relative inline-block">
+            {chars.map((char, i) => {
+              const start = 0.2 + (i / chars.length) * 0.45;
+              const end = start + 0.45 / chars.length + 0.06;
+              return (
+                <JudoChar key={i} char={char} progress={scrollYProgress} start={start} end={end} />
+              );
+            })}
+            {/* Brush-stroke underline */}
+            <motion.span
+              style={{ scaleX: smoothUnderline, transformOrigin: 'left' }}
+              className="absolute -bottom-2 left-[5%] right-[5%] h-[3px] rounded-full bg-gradient-to-r from-blue-400 via-blue-500 to-blue-400 opacity-60"
+            />
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const JudoChar = ({ char, progress, start, end }) => {
+  const opacity = useTransform(progress, [start, end], [0, 1]);
+  const y = useTransform(progress, [start, end], [8, 0]);
+  return (
+    <motion.span style={{ opacity, y }} className="inline-block">
+      {char === ' ' ? '\u00A0' : char}
+    </motion.span>
   );
 };
 
@@ -131,33 +239,29 @@ const HeroQuote = () => {
   );
 };
 
-/* ─── Sticky "leverage" section — scroll-progress driven ─── */
-const LeverageSticky = () => {
-  const wrapperRef = useRef(null);
+/* ─── "Leverage" section — scroll-progress fade-in ─── */
+const LeverageSection = () => {
+  const ref = useRef(null);
   const { scrollYProgress } = useScroll({
-    target: wrapperRef,
-    offset: ['start end', 'start 0.2'],
+    target: ref,
+    offset: ['start end', 'start 0.35'],
   });
   const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
   const y = useTransform(scrollYProgress, [0, 1], [40, 0]);
 
   return (
-    <div className="min-h-[90vh] sm:min-h-[120vh] relative">
-      <div className="sticky top-0 min-h-screen flex items-center justify-center px-6">
-        <div ref={wrapperRef}>
-          <motion.div
-            style={{ opacity, y }}
-            className="text-center max-w-2xl mx-auto"
-          >
-            <p className="text-xl sm:text-2xl md:text-3xl text-slate-600 dark:text-slate-300 leading-relaxed">
-              The ultimate concept between these two ideas is
-            </p>
-            <p className="text-5xl sm:text-6xl md:text-8xl font-playfair font-bold text-slate-800 dark:text-slate-100 mt-3 sm:mt-4">
-              leverage.
-            </p>
-          </motion.div>
-        </div>
-      </div>
+    <div ref={ref} className="min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center px-6">
+      <motion.div
+        style={{ opacity, y }}
+        className="text-center max-w-2xl mx-auto"
+      >
+        <p className="text-xl sm:text-2xl md:text-3xl text-slate-600 dark:text-slate-300 leading-relaxed">
+          The ultimate concept between these two ideas is
+        </p>
+        <p className="text-5xl sm:text-6xl md:text-8xl font-playfair font-bold text-slate-800 dark:text-slate-100 mt-3 sm:mt-4">
+          leverage.
+        </p>
+      </motion.div>
     </div>
   );
 };
@@ -196,41 +300,42 @@ const ScrollWord = ({ word, scrollYProgress, start, end }) => {
   );
 };
 
-/* ─── The Contrast — scroll-progress driven ─── */
+/* ─── The Contrast — sticky scroll-locked ─── */
 const ContrastSection = () => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start end', 'end 0.7'],
+    offset: ['start start', 'end start'],
   });
 
   const words1 = "But most people don't take them.".split(' ');
-  const words2 = "Not because they can't —".split(' ');
+  const words2 = 'Not because they cant'.split(' ');
 
   /* "uncomfortable" reveal */
-  const uncomfOpacity = useTransform(scrollYProgress, [0.3, 0.45], [0, 1]);
-  const uncomfScale = useTransform(scrollYProgress, [0.3, 0.45], [0.8, 1]);
+  const uncomfOpacity = useTransform(scrollYProgress, [0.2, 0.32], [0, 1]);
+  const uncomfScale = useTransform(scrollYProgress, [0.2, 0.32], [0.8, 1]);
 
   /* "status quo" */
-  const statusOpacity = useTransform(scrollYProgress, [0.45, 0.55], [0, 1]);
+  const statusOpacity = useTransform(scrollYProgress, [0.32, 0.42], [0, 1]);
 
   /* Scale visual */
-  const scaleVisOpacity = useTransform(scrollYProgress, [0.55, 0.68], [0, 1]);
-  const scaleVisY = useTransform(scrollYProgress, [0.55, 0.68], [20, 0]);
+  const scaleVisOpacity = useTransform(scrollYProgress, [0.42, 0.52], [0, 1]);
+  const scaleVisY = useTransform(scrollYProgress, [0.42, 0.52], [20, 0]);
 
   /* Left/right arms */
-  const leftX = useTransform(scrollYProgress, [0.62, 0.75], [30, 0]);
-  const leftOpacity = useTransform(scrollYProgress, [0.62, 0.75], [0, 1]);
-  const rightX = useTransform(scrollYProgress, [0.62, 0.75], [-30, 0]);
-  const rightOpacity = useTransform(scrollYProgress, [0.62, 0.75], [0, 1]);
-  const pivotScale = useTransform(scrollYProgress, [0.6, 0.7], [0, 1]);
+  const leftX = useTransform(scrollYProgress, [0.48, 0.58], [30, 0]);
+  const leftOpacity = useTransform(scrollYProgress, [0.48, 0.58], [0, 1]);
+  const rightX = useTransform(scrollYProgress, [0.48, 0.58], [-30, 0]);
+  const rightOpacity = useTransform(scrollYProgress, [0.48, 0.58], [0, 1]);
+  const pivotScale = useTransform(scrollYProgress, [0.46, 0.54], [0, 1]);
 
   /* Label */
-  const labelOpacity = useTransform(scrollYProgress, [0.75, 0.88], [0, 1]);
+  const labelOpacity = useTransform(scrollYProgress, [0.58, 0.68], [0, 1]);
 
   return (
-    <div ref={ref} className="min-h-[90vh] sm:min-h-screen flex items-center justify-center px-6 py-16">
-      <div className="w-full max-w-2xl mx-auto space-y-10 sm:space-y-14">
+    <div ref={ref} className="relative h-[425vh]">
+      <div className="sticky top-0 h-screen flex items-center justify-center px-6">
+        <div className="w-full max-w-2xl mx-auto space-y-10 sm:space-y-14">
 
         {/* Line 1: word-by-word stagger */}
         <div className="text-center">
@@ -240,8 +345,8 @@ const ContrastSection = () => {
                 key={`w1-${i}`}
                 word={word}
                 scrollYProgress={scrollYProgress}
-                start={(i / words1.length) * 0.15}
-                end={(i / words1.length) * 0.15 + 0.06}
+                start={0.02 + (i / words1.length) * 0.1}
+                end={0.02 + (i / words1.length) * 0.1 + 0.04}
               />
             ))}
           </p>
@@ -251,8 +356,8 @@ const ContrastSection = () => {
                 key={`w2-${i}`}
                 word={word}
                 scrollYProgress={scrollYProgress}
-                start={0.12 + (i / words2.length) * 0.12}
-                end={0.12 + (i / words2.length) * 0.12 + 0.06}
+                start={0.1 + (i / words2.length) * 0.08}
+                end={0.1 + (i / words2.length) * 0.08 + 0.04}
               />
             ))}
           </p>
@@ -263,7 +368,7 @@ const ContrastSection = () => {
           style={{ opacity: uncomfOpacity, scale: uncomfScale }}
           className="text-center"
         >
-          <p className="text-sm sm:text-base text-slate-400 dark:text-slate-500 mb-2">because it's</p>
+          <p className="text-sm sm:text-base text-slate-400 dark:text-slate-500 mb-2">but because it's</p>
           <p className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
             uncomfortable.
           </p>
@@ -288,9 +393,9 @@ const ContrastSection = () => {
               style={{ x: leftX, opacity: leftOpacity }}
               className="flex-1 text-right"
             >
-              <p className="text-xs sm:text-sm uppercase tracking-widest text-slate-300 dark:text-slate-600 mb-1 font-medium">downside</p>
-              <div className="h-[2px] bg-slate-200 dark:bg-slate-700 rounded-full" />
-              <p className="text-sm sm:text-base text-slate-400 dark:text-slate-600 mt-2 font-medium">limited</p>
+              <p className="text-sm sm:text-base uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1 font-semibold">downside</p>
+              <div className="h-[2px] bg-slate-300 dark:bg-slate-600 rounded-full" />
+              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mt-2 font-semibold">limited</p>
             </motion.div>
 
             {/* Center pivot */}
@@ -298,7 +403,7 @@ const ContrastSection = () => {
               style={{ scale: pivotScale }}
               className="flex-shrink-0"
             >
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-slate-300 dark:bg-slate-600" />
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-slate-400 dark:bg-slate-500" />
             </motion.div>
 
             {/* Right side — limited upside */}
@@ -306,20 +411,21 @@ const ContrastSection = () => {
               style={{ x: rightX, opacity: rightOpacity }}
               className="flex-1 text-left"
             >
-              <p className="text-xs sm:text-sm uppercase tracking-widest text-slate-300 dark:text-slate-600 mb-1 font-medium">upside</p>
-              <div className="h-[2px] bg-slate-200 dark:bg-slate-700 rounded-full" />
-              <p className="text-sm sm:text-base text-slate-400 dark:text-slate-600 mt-2 font-medium">limited</p>
+              <p className="text-sm sm:text-base uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1 font-semibold">upside</p>
+              <div className="h-[2px] bg-slate-300 dark:bg-slate-600 rounded-full" />
+              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mt-2 font-semibold">limited</p>
             </motion.div>
           </div>
 
           {/* Label underneath */}
           <motion.p
             style={{ opacity: labelOpacity }}
-            className="text-center text-xs sm:text-sm text-slate-300 dark:text-slate-700 mt-6 sm:mt-8 tracking-wider uppercase"
+            className="text-center text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-6 sm:mt-8 tracking-wider uppercase font-medium"
           >
             the most symmetric bet you can make
           </motion.p>
         </motion.div>
+        </div>
       </div>
     </div>
   );
@@ -866,26 +972,13 @@ const Portfolio = () => {
             <HeroQuote />
 
             {/* Section 2: Obsession Statement */}
-            <ScrollSection height="min-h-[60vh] sm:min-h-[70vh]">
-              <p className="text-2xl sm:text-3xl md:text-4xl text-slate-800 dark:text-slate-100 text-center font-medium leading-snug">
-                I'm obsessed with this idea.
-              </p>
-            </ScrollSection>
+            <ObsessionStatement />
 
             {/* Section 3: Judo Connection */}
-            <ScrollSection height="min-h-[60vh] sm:min-h-[70vh]">
-              <div className="text-center space-y-4 sm:space-y-6">
-                <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base md:text-lg">
-                  It's similar to a concept we use in Judo:
-                </p>
-                <p className="font-playfair italic text-2xl sm:text-3xl md:text-4xl text-slate-700 dark:text-slate-200 leading-snug">
-                  "maximum efficient use of energy"
-                </p>
-              </div>
-            </ScrollSection>
+            <JudoQuote />
 
-            {/* Section 4: Leverage — sticky concept */}
-            <LeverageSticky />
+            {/* Section 4: Leverage — scroll fade-in */}
+            <LeverageSection />
 
             {/* Section 5: Philosophy Explanation */}
             <ScrollSection height="min-h-[60vh] sm:min-h-[70vh]">
