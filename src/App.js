@@ -1,5 +1,438 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { Users, Eye, Mail, Instagram, Linkedin, Youtube, BarChart3, ArrowRight, Sun, Moon } from 'lucide-react';
+
+/* ─── Scroll-reveal section wrapper — scroll-progress driven ─── */
+const ScrollSection = ({ children, className = '', height = 'min-h-[70vh]', id }) => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'start 0.35'],
+  });
+  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const y = useTransform(scrollYProgress, [0, 1], [50, 0]);
+
+  return (
+    <div ref={ref} id={id} className={`${height} flex items-center justify-center px-6 ${className}`}>
+      <motion.div style={{ opacity, y }} className="w-full max-w-2xl mx-auto">
+        {children}
+      </motion.div>
+    </div>
+  );
+};
+
+/* ─── Card that slides in from left or right — scroll-progress driven ─── */
+const SlideCard = ({ children, from = 'left', delay = 0, className = '' }) => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'start 0.4'],
+  });
+  const xStart = from === 'left' ? -80 : 80;
+  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const x = useTransform(scrollYProgress, [0, 1], [xStart, 0]);
+
+  return (
+    <div ref={ref}>
+      <motion.div style={{ opacity, x }} className={className}>
+        {children}
+      </motion.div>
+    </div>
+  );
+};
+
+/* ─── Hero quote — asymmetric left-aligned layout ─── */
+const HeroQuote = () => {
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+
+  /* Fade/scale out as user scrolls away */
+  const fadeOut = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const scaleOut = useTransform(scrollYProgress, [0, 0.6], [1, 0.95]);
+  const yOut = useTransform(scrollYProgress, [0, 0.6], [0, -40]);
+
+  /* Scroll-driven entrance: each element appears based on scroll position within the section */
+  const contentRef = useRef(null);
+  const { scrollYProgress: enterProgress } = useScroll({
+    target: contentRef,
+    offset: ['start end', 'start 0.3'],
+  });
+
+  const tagOpacity = useTransform(enterProgress, [0, 0.15], [0, 1]);
+  const tagY = useTransform(enterProgress, [0, 0.15], [15, 0]);
+
+  const titleOpacity = useTransform(enterProgress, [0.1, 0.3], [0, 1]);
+  const titleY = useTransform(enterProgress, [0.1, 0.3], [30, 0]);
+
+  const dividerScale = useTransform(enterProgress, [0.25, 0.5], [0, 1]);
+
+  const quoteOpacity = useTransform(enterProgress, [0.4, 0.65], [0, 1]);
+  const quoteY = useTransform(enterProgress, [0.4, 0.65], [20, 0]);
+
+  const scrollIndicatorOpacity = useTransform(enterProgress, [0.6, 0.85], [0, 1]);
+
+  return (
+    <div ref={heroRef} className="min-h-[85vh] relative overflow-hidden">
+      <motion.div
+        ref={contentRef}
+        style={{ opacity: fadeOut, scale: scaleOut, y: yOut }}
+        className="relative z-10 min-h-[85vh] flex flex-col justify-start pt-[4vh] sm:pt-[6vh] pb-8 px-8 sm:px-12 md:px-20 lg:px-28 max-w-6xl mx-auto"
+      >
+        {/* MY PHILOSOPHY — tiny uppercase tag */}
+        <motion.p
+          style={{ opacity: tagOpacity, y: tagY }}
+          className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-slate-400 dark:text-slate-500 mb-6 sm:mb-8 md:mb-10 font-medium"
+        >
+          my philosophy
+        </motion.p>
+
+        {/* ASYMMETRIC RISK — massive bold heading */}
+        <motion.div
+          style={{ opacity: titleOpacity, y: titleY }}
+          className="mb-5 sm:mb-7"
+        >
+          <h1 className="font-bold text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight leading-[0.9] text-slate-800 dark:text-slate-100">
+            <span className="text-blue-600 dark:text-blue-400">Asymmetric</span>
+            <br />
+            risk
+          </h1>
+        </motion.div>
+
+        {/* Off-center asymmetric divider */}
+        <motion.div
+          style={{ scaleX: dividerScale }}
+          className="origin-left mb-6 sm:mb-8"
+        >
+          <div className="h-[2px] w-32 sm:w-48 md:w-64 bg-blue-500/40 dark:bg-blue-400/40" />
+        </motion.div>
+
+        {/* Definition — smaller serif, generous line height */}
+        <motion.blockquote
+          style={{ opacity: quoteOpacity, y: quoteY }}
+          className="max-w-lg"
+        >
+          <p className="font-playfair text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed sm:leading-[1.8] font-normal">
+            Taking a risk where the potential return far exceeds the risk taken.
+          </p>
+        </motion.blockquote>
+
+        {/* Spacer to push scroll indicator down */}
+        <div className="flex-1" />
+
+        {/* Scroll indicator — flows at the bottom */}
+        <motion.div style={{ opacity: scrollIndicatorOpacity }}>
+          <div className="flex items-center gap-3">
+            <div className="w-px h-8 sm:h-10 bg-slate-300 dark:bg-slate-600 animate-pulse" />
+            <span className="text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-slate-400 dark:text-slate-600 font-medium">scroll</span>
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+/* ─── Sticky "leverage" section — scroll-progress driven ─── */
+const LeverageSticky = () => {
+  const wrapperRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: wrapperRef,
+    offset: ['start end', 'start 0.2'],
+  });
+  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const y = useTransform(scrollYProgress, [0, 1], [40, 0]);
+
+  return (
+    <div className="min-h-[90vh] sm:min-h-[120vh] relative">
+      <div className="sticky top-0 min-h-screen flex items-center justify-center px-6">
+        <div ref={wrapperRef}>
+          <motion.div
+            style={{ opacity, y }}
+            className="text-center max-w-2xl mx-auto"
+          >
+            <p className="text-xl sm:text-2xl md:text-3xl text-slate-600 dark:text-slate-300 leading-relaxed">
+              The ultimate concept between these two ideas is
+            </p>
+            <p className="text-5xl sm:text-6xl md:text-8xl font-playfair font-bold text-slate-800 dark:text-slate-100 mt-3 sm:mt-4">
+              leverage.
+            </p>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Final "asymmetric risks" hero moment — scroll-progress driven ─── */
+const FinalStatement = () => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'start 0.35'],
+  });
+  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const scale = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
+
+  return (
+    <div ref={ref} className="min-h-[70vh] sm:min-h-[85vh] flex items-center justify-center px-6">
+      <motion.div style={{ opacity, scale }} className="text-center">
+        <p className="font-playfair text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-800 dark:text-slate-100 leading-tight">
+          I'd rather take
+          <br />
+          <span className="text-blue-600 dark:text-blue-400">asymmetric</span> risks.
+        </p>
+      </motion.div>
+    </div>
+  );
+};
+
+/* ─── Single animated word — scroll-progress driven ─── */
+const ScrollWord = ({ word, scrollYProgress, start, end }) => {
+  const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
+  const y = useTransform(scrollYProgress, [start, end], [12, 0]);
+  return (
+    <motion.span style={{ opacity, y }} className="inline-block mr-[0.3em]">
+      {word}
+    </motion.span>
+  );
+};
+
+/* ─── The Contrast — scroll-progress driven ─── */
+const ContrastSection = () => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end 0.7'],
+  });
+
+  const words1 = "But most people don't take them.".split(' ');
+  const words2 = "Not because they can't —".split(' ');
+
+  /* "uncomfortable" reveal */
+  const uncomfOpacity = useTransform(scrollYProgress, [0.3, 0.45], [0, 1]);
+  const uncomfScale = useTransform(scrollYProgress, [0.3, 0.45], [0.8, 1]);
+
+  /* "status quo" */
+  const statusOpacity = useTransform(scrollYProgress, [0.45, 0.55], [0, 1]);
+
+  /* Scale visual */
+  const scaleVisOpacity = useTransform(scrollYProgress, [0.55, 0.68], [0, 1]);
+  const scaleVisY = useTransform(scrollYProgress, [0.55, 0.68], [20, 0]);
+
+  /* Left/right arms */
+  const leftX = useTransform(scrollYProgress, [0.62, 0.75], [30, 0]);
+  const leftOpacity = useTransform(scrollYProgress, [0.62, 0.75], [0, 1]);
+  const rightX = useTransform(scrollYProgress, [0.62, 0.75], [-30, 0]);
+  const rightOpacity = useTransform(scrollYProgress, [0.62, 0.75], [0, 1]);
+  const pivotScale = useTransform(scrollYProgress, [0.6, 0.7], [0, 1]);
+
+  /* Label */
+  const labelOpacity = useTransform(scrollYProgress, [0.75, 0.88], [0, 1]);
+
+  return (
+    <div ref={ref} className="min-h-[90vh] sm:min-h-screen flex items-center justify-center px-6 py-16">
+      <div className="w-full max-w-2xl mx-auto space-y-10 sm:space-y-14">
+
+        {/* Line 1: word-by-word stagger */}
+        <div className="text-center">
+          <p className="text-xl sm:text-2xl md:text-3xl text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+            {words1.map((word, i) => (
+              <ScrollWord
+                key={`w1-${i}`}
+                word={word}
+                scrollYProgress={scrollYProgress}
+                start={(i / words1.length) * 0.15}
+                end={(i / words1.length) * 0.15 + 0.06}
+              />
+            ))}
+          </p>
+          <p className="text-xl sm:text-2xl md:text-3xl text-slate-700 dark:text-slate-200 leading-relaxed font-medium mt-1">
+            {words2.map((word, i) => (
+              <ScrollWord
+                key={`w2-${i}`}
+                word={word}
+                scrollYProgress={scrollYProgress}
+                start={0.12 + (i / words2.length) * 0.12}
+                end={0.12 + (i / words2.length) * 0.12 + 0.06}
+              />
+            ))}
+          </p>
+        </div>
+
+        {/* "because it's uncomfortable" — big dramatic reveal */}
+        <motion.div
+          style={{ opacity: uncomfOpacity, scale: uncomfScale }}
+          className="text-center"
+        >
+          <p className="text-sm sm:text-base text-slate-400 dark:text-slate-500 mb-2">because it's</p>
+          <p className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+            uncomfortable.
+          </p>
+        </motion.div>
+
+        {/* "So they choose the status quo" — faded, smaller */}
+        <motion.p
+          style={{ opacity: statusOpacity }}
+          className="text-center text-base sm:text-lg text-slate-400 dark:text-slate-500"
+        >
+          So they choose the <span className="italic">status quo</span>.
+        </motion.p>
+
+        {/* Symmetric scale visual */}
+        <motion.div
+          style={{ opacity: scaleVisOpacity, y: scaleVisY }}
+          className="pt-4 sm:pt-8"
+        >
+          <div className="relative flex items-center justify-center gap-4 sm:gap-6">
+            {/* Left side — limited downside */}
+            <motion.div
+              style={{ x: leftX, opacity: leftOpacity }}
+              className="flex-1 text-right"
+            >
+              <p className="text-xs sm:text-sm uppercase tracking-widest text-slate-300 dark:text-slate-600 mb-1 font-medium">downside</p>
+              <div className="h-[2px] bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <p className="text-sm sm:text-base text-slate-400 dark:text-slate-600 mt-2 font-medium">limited</p>
+            </motion.div>
+
+            {/* Center pivot */}
+            <motion.div
+              style={{ scale: pivotScale }}
+              className="flex-shrink-0"
+            >
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-slate-300 dark:bg-slate-600" />
+            </motion.div>
+
+            {/* Right side — limited upside */}
+            <motion.div
+              style={{ x: rightX, opacity: rightOpacity }}
+              className="flex-1 text-left"
+            >
+              <p className="text-xs sm:text-sm uppercase tracking-widest text-slate-300 dark:text-slate-600 mb-1 font-medium">upside</p>
+              <div className="h-[2px] bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <p className="text-sm sm:text-base text-slate-400 dark:text-slate-600 mt-2 font-medium">limited</p>
+            </motion.div>
+          </div>
+
+          {/* Label underneath */}
+          <motion.p
+            style={{ opacity: labelOpacity }}
+            className="text-center text-xs sm:text-sm text-slate-300 dark:text-slate-700 mt-6 sm:mt-8 tracking-wider uppercase"
+          >
+            the most symmetric bet you can make
+          </motion.p>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Fade-in wrapper — scroll-progress driven ─── */
+const FadeInBlock = ({ children, className = '' }) => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'start 0.6'],
+  });
+  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const y = useTransform(scrollYProgress, [0, 1], [30, 0]);
+
+  return (
+    <div ref={ref} className={className}>
+      <motion.div style={{ opacity, y }}>
+        {children}
+      </motion.div>
+    </div>
+  );
+};
+
+/* ─── Hobbies grid with staggered children ─── */
+const HobbiesSection = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-5% 0px -5% 0px' });
+  const hobbies = [
+    { type: 'video', src: '/images/jiujitsu.mp4', label: 'jiu jitsu' },
+    { type: 'img', src: '/images/badminton.jpg', label: 'badminton' },
+    { type: 'img', src: '/images/hockey.jpg', label: 'hockey' },
+    { type: 'img', src: '/images/investing.jpg', label: 'investing' },
+  ];
+
+  return (
+    <div ref={ref}>
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-100 dark:border-slate-800">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 flex items-center gap-2">
+            <span className="text-blue-500 dark:text-blue-400">✦</span> hobbies
+          </h2>
+          <div className="grid grid-cols-2 gap-3 sm:gap-5">
+            {hobbies.map((hobby, i) => (
+              <motion.div
+                key={hobby.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.6, delay: 0.1 + i * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+                className="bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow duration-300"
+              >
+                <div className="aspect-square relative overflow-hidden">
+                  {hobby.type === 'video' ? (
+                    <video src={hobby.src} className="w-full h-full object-cover" autoPlay loop muted playsInline />
+                  ) : (
+                    <img src={hobby.src} alt={hobby.label} className="w-full h-full object-cover" />
+                  )}
+                </div>
+                <div className="p-3 sm:p-4 text-center">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">{hobby.label}</h3>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+/* ─── Quick facts with fade-in ─── */
+const QuickFacts = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-5% 0px -5% 0px' });
+
+  return (
+    <div ref={ref}>
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+        transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-100 dark:border-slate-800">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <span className="text-blue-500 dark:text-blue-400">✦</span> quick facts
+          </h2>
+          <ul className="space-y-2 text-slate-700 dark:text-slate-300 text-sm sm:text-base">
+            <li className="flex items-start gap-3">
+              <span className="text-blue-500 dark:text-blue-400 text-xl">→</span>
+              <span>I speak 2.5 languages (english, chinese, and learning french)</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-teal-500 dark:text-teal-400 text-xl">→</span>
+              <span>my favourite dish is eggs and tomatoes</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-blue-500 dark:text-blue-400 text-xl">→</span>
+              <span>I enjoy snowboarding in the Rockies (love sunshine)</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 dark:text-blue-400 text-xl">→</span>
+              <span>1400 rapid chess - <a href="https://www.chess.com/member/xxhyperinsanexx" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline" data-hover>challenge me!</a></span>
+            </li>
+          </ul>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 /* ─── Custom cursor component ─── */
 const CustomCursor = () => {
@@ -224,6 +657,11 @@ const Portfolio = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
 
+  /* Scroll to top on tab change — essential for scroll-driven about page */
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [activeTab]);
+
   /* Track mouse for gradient background */
   const handleGlobalMouse = useCallback((e) => {
     setMousePos({
@@ -318,7 +756,7 @@ const Portfolio = () => {
       {/* Easter egg toast */}
       {easterEgg && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-white dark:bg-gray-800 px-6 py-3 rounded-full shadow-lg border border-slate-200 dark:border-gray-700 animate-bounce">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">🎉 you typed "hire" — i like where this is going! → <span className="text-blue-600 dark:text-blue-400 font-semibold">info@ethanzhou.ca</span></span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">🎉 you typed "hire" i like where this is going! → <span className="text-blue-600 dark:text-blue-400 font-semibold">info@ethanzhou.ca</span></span>
         </div>
       )}
 
@@ -420,154 +858,125 @@ const Portfolio = () => {
           </div>
         )}
 
-        {/* ═══ ABOUT ═══ */}
+        {/* ═══ ABOUT — Scroll-driven storytelling ═══ */}
         {activeTab === 'about' && (
-          <div className="space-y-8 sm:space-y-12 max-w-2xl mx-auto">
+          <div className="-mx-6 -mt-4">
 
-            {/* Page heading */}
-            <div className="stagger-item" style={{ animationDelay: '0s' }}>
-              <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100">
-                <span className="text-blue-500 dark:text-blue-400">✦</span> about me
-              </h1>
-            </div>
+            {/* Section 1: Hero Quote — full viewport, fades/scales on scroll */}
+            <HeroQuote />
 
-            {/* ── Hero Quote ── */}
-            <div className="stagger-item" style={{ animationDelay: '0.12s' }}>
-              <blockquote className="relative py-8 sm:py-12 px-6 sm:px-10 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 shadow-md">
-                <div className="absolute top-10 left-4 sm:left-6 text-6xl sm:text-7xl font-playfair text-slate-200 dark:text-slate-700 leading-none select-none" aria-hidden="true">&ldquo;</div>
-                <div className="absolute bottom-4 right-4 sm:right-4 text-6xl sm:text-7xl font-playfair text-slate-200 dark:text-slate-700 leading-none select-none" aria-hidden="true">&rdquo;</div>
-                <p className="relative font-playfair text-xl sm:text-2xl md:text-3xl text-slate-800 dark:text-slate-100 leading-snug sm:leading-relaxed text-center font-medium">
-                  <span className="font-semibold text-blue-600 dark:text-blue-400">Asymmetric risk</span>: taking a risk where the potential return far exceeds the risk taken.
-                </p>
-              </blockquote>
-            </div>
-
-            {/* ── Body ── */}
-            <div className="stagger-item space-y-6 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed sm:leading-loose" style={{ animationDelay: '0.24s' }}>
-              <p>
+            {/* Section 2: Obsession Statement */}
+            <ScrollSection height="min-h-[60vh] sm:min-h-[70vh]">
+              <p className="text-2xl sm:text-3xl md:text-4xl text-slate-800 dark:text-slate-100 text-center font-medium leading-snug">
                 I'm obsessed with this idea.
               </p>
-            </div>
+            </ScrollSection>
 
-            {/* Judo quote — left-accent callout */}
-            <div className="stagger-item" style={{ animationDelay: '0.36s' }}>
-              <div className="border-l-4 border-teal-500 dark:border-teal-400 pl-5 sm:pl-6 py-1">
-                <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base mb-1">It's similar to a concept we use in Judo:</p>
-                <p className="font-playfair italic text-lg sm:text-xl text-slate-700 dark:text-slate-200">
+            {/* Section 3: Judo Connection */}
+            <ScrollSection height="min-h-[60vh] sm:min-h-[70vh]">
+              <div className="text-center space-y-4 sm:space-y-6">
+                <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base md:text-lg">
+                  It's similar to a concept we use in Judo:
+                </p>
+                <p className="font-playfair italic text-2xl sm:text-3xl md:text-4xl text-slate-700 dark:text-slate-200 leading-snug">
                   "maximum efficient use of energy"
                 </p>
               </div>
-            </div>
+            </ScrollSection>
 
-            <div className="stagger-item space-y-6 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed sm:leading-loose" style={{ animationDelay: '0.48s' }}>
-              <p>
-                The ultimate concept between these two ideas is <strong className="text-slate-800 dark:text-slate-100 font-semibold">leverage</strong>.
-              </p>
-              <p>
-                Every action should maximize the ratio of results to effort. It's about placing small bets where the upside is enormous and the downside is negligible.
-              </p>
-            </div>
+            {/* Section 4: Leverage — sticky concept */}
+            <LeverageSticky />
 
-            {/* ── Worst / Best case examples ── */}
-            <div className="stagger-item space-y-5" style={{ animationDelay: '0.6s' }}>
-              {/* Example 1 */}
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 p-5 sm:p-6">
-                <p className="text-slate-700 dark:text-slate-200 text-base sm:text-lg font-medium mb-3">Send an email to someone you admire.</p>
-                <div className="space-y-1.5 text-sm sm:text-base">
-                  <p><span className="font-semibold text-slate-400 dark:text-slate-500">Worst case:</span> <span className="text-slate-500 dark:text-slate-400">they ignore it.</span></p>
-                  <p><span className="font-semibold text-blue-600 dark:text-blue-400">Best case:</span> <span className="text-slate-700 dark:text-slate-200">it changes your career.</span></p>
-                </div>
-              </div>
-              {/* Example 2 */}
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 p-5 sm:p-6">
-                <p className="text-slate-700 dark:text-slate-200 text-base sm:text-lg font-medium mb-3">Publish your ideas online.</p>
-                <div className="space-y-1.5 text-sm sm:text-base">
-                  <p><span className="font-semibold text-slate-400 dark:text-slate-500">Worst case:</span> <span className="text-slate-500 dark:text-slate-400">no one reads them.</span></p>
-                  <p><span className="font-semibold text-blue-600 dark:text-blue-400">Best case:</span> <span className="text-slate-700 dark:text-slate-200">the right person does.</span></p>
-                </div>
-              </div>
-            </div>
-
-            {/* ── Closing paragraphs ── */}
-            <div className="stagger-item space-y-6 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed sm:leading-loose" style={{ animationDelay: '0.72s' }}>
-              <p>
-                The strange thing is that these opportunities are everywhere.
+            {/* Section 5: Philosophy Explanation */}
+            <ScrollSection height="min-h-[60vh] sm:min-h-[70vh]">
+              <p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed sm:leading-loose text-center">
+                Every action should maximize the ratio of results to effort. It's about placing small bets where the upside is{' '}
+                <strong className="text-slate-800 dark:text-slate-100 font-semibold">enormous</strong>{' '}
+                and the downside is{' '}
+                <strong className="text-slate-800 dark:text-slate-100 font-semibold">negligible</strong>.
               </p>
-              <p>
-                But most people don't take them. Not because they can't — because it's <strong className="text-slate-800 dark:text-slate-100 font-semibold">uncomfortable</strong>. So they choose the <em className="text-slate-500 dark:text-slate-400">status quo</em>.
-              </p>
-              <p>
-                And doing nothing is the most symmetric bet you can make: limited downside, limited upside.
-              </p>
-            </div>
+            </ScrollSection>
 
-            {/* ── Closing statement ── */}
-            <div className="stagger-item" style={{ animationDelay: '0.84s' }}>
-              <p className="font-playfair text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-800 dark:text-slate-100 text-center py-4">
-                I'd rather take <span className="text-blue-600 dark:text-blue-400">asymmetric</span> risks.
-              </p>
-            </div>
-
-            {/* ── Divider ── */}
-            <div className="stagger-item flex justify-center" style={{ animationDelay: '0.96s' }}>
-              <div className="w-12 h-px bg-slate-300 dark:bg-slate-700"></div>
-            </div>
-
-            {/* ── Hobbies ── */}
-            <div className="stagger-item" style={{ animationDelay: '1.05s' }}>
-              <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-100 dark:border-slate-800">
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 flex items-center gap-2">
-                  <span className="text-blue-500 dark:text-blue-400">✦</span> hobbies
-                </h2>
-                
-                <div className="grid grid-cols-2 gap-3 sm:gap-5">
-                  {[
-                    { type: 'video', src: '/images/jiujitsu.mp4', label: 'jiu jitsu' },
-                    { type: 'img', src: '/images/badminton.jpg', label: 'badminton' },
-                    { type: 'img', src: '/images/hockey.jpg', label: 'hockey' },
-                    { type: 'img', src: '/images/investing.jpg', label: 'investing' },
-                  ].map((hobby, i) => (
-                    <div key={hobby.label} className="stagger-item bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow duration-300" style={{ animationDelay: `${1.1 + i * 0.08}s` }}>
-                      <div className="aspect-square relative overflow-hidden">
-                        {hobby.type === 'video' ? (
-                          <video src={hobby.src} className="w-full h-full object-cover" autoPlay loop muted playsInline />
-                        ) : (
-                          <img src={hobby.src} alt={hobby.label} className="w-full h-full object-cover" />
-                        )}
-                      </div>
-                      <div className="p-3 sm:p-4 text-center">
-                        <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">{hobby.label}</h3>
-                      </div>
+            {/* Section 6: Example Callout Cards */}
+            <div className="min-h-[70vh] sm:min-h-[80vh] flex items-center justify-center px-6">
+              <div className="w-full max-w-2xl mx-auto space-y-6 sm:space-y-8">
+                <SlideCard from="left" delay={0}>
+                  <div className="rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 p-6 sm:p-8 shadow-lg">
+                    <p className="text-slate-800 dark:text-slate-100 text-lg sm:text-xl font-semibold mb-4 sm:mb-5">
+                      Send an email to someone you admire.
+                    </p>
+                    <div className="space-y-2 sm:space-y-3">
+                      <p className="flex items-start gap-3">
+                        <span className="text-slate-300 dark:text-slate-600 text-lg sm:text-xl">↓</span>
+                        <span><span className="font-semibold text-slate-400 dark:text-slate-500">Worst case:</span>{' '}<span className="text-slate-500 dark:text-slate-400">they ignore it.</span></span>
+                      </p>
+                      <p className="flex items-start gap-3">
+                        <span className="text-blue-500 dark:text-blue-400 text-lg sm:text-xl">↑</span>
+                        <span><span className="font-semibold text-blue-600 dark:text-blue-400">Best case:</span>{' '}<span className="text-slate-800 dark:text-slate-100 font-medium">it changes your career.</span></span>
+                      </p>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                </SlideCard>
+
+                <SlideCard from="right" delay={0.15}>
+                  <div className="rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 p-6 sm:p-8 shadow-lg">
+                    <p className="text-slate-800 dark:text-slate-100 text-lg sm:text-xl font-semibold mb-4 sm:mb-5">
+                      Publish your ideas online.
+                    </p>
+                    <div className="space-y-2 sm:space-y-3">
+                      <p className="flex items-start gap-3">
+                        <span className="text-slate-300 dark:text-slate-600 text-lg sm:text-xl">↓</span>
+                        <span><span className="font-semibold text-slate-400 dark:text-slate-500">Worst case:</span>{' '}<span className="text-slate-500 dark:text-slate-400">no one reads them.</span></span>
+                      </p>
+                      <p className="flex items-start gap-3">
+                        <span className="text-blue-500 dark:text-blue-400 text-lg sm:text-xl">↑</span>
+                        <span><span className="font-semibold text-blue-600 dark:text-blue-400">Best case:</span>{' '}<span className="text-slate-800 dark:text-slate-100 font-medium">the right person does.</span></span>
+                      </p>
+                    </div>
+                  </div>
+                </SlideCard>
               </div>
             </div>
 
-            {/* ── Quick Facts ── */}
-            <div className="stagger-item" style={{ animationDelay: '1.2s' }}>
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-100 dark:border-slate-800">
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
-                  <span className="text-blue-500 dark:text-blue-400">✦</span> quick facts
-                </h2>
-                <ul className="space-y-2 text-slate-700 dark:text-slate-300 text-sm sm:text-base">
-                  <li className="flex items-start gap-3">
-                    <span className="text-blue-500 dark:text-blue-400 text-xl">→</span>
-                    <span>I speak 2.5 languages (english, chinese, and learning french)</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-teal-500 dark:text-teal-400 text-xl">→</span>
-                    <span>my favourite dish is eggs and tomatoes</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-blue-500 dark:text-blue-400 text-xl">→</span>
-                    <span>I enjoy snowboarding in the Rockies (love sunshine)</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-blue-600 dark:text-blue-400 text-xl">→</span>
-                    <span>1400 rapid chess - <a href="https://www.chess.com/member/xxhyperinsanexx" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline" data-hover>challenge me!</a></span>
-                  </li>
-                </ul>
+            {/* Section 7: The Reality */}
+            <ScrollSection height="min-h-[60vh] sm:min-h-[70vh]">
+              <div className="text-center space-y-6 sm:space-y-8">
+                <p className="text-xl sm:text-2xl md:text-3xl text-slate-700 dark:text-slate-200 leading-relaxed">
+                  The strange thing is that these opportunities are everywhere.
+                </p>
+              </div>
+            </ScrollSection>
+
+            {/* Section 8: The Contrast — animated reveal */}
+            <ContrastSection />
+
+            {/* Section 9: Final Statement — hero moment */}
+            <FinalStatement />
+
+            {/* Section 10: Transition to About Me + Hobbies */}
+            <div className="px-6">
+              <div className="max-w-2xl mx-auto space-y-8 sm:space-y-12 pb-8">
+
+                {/* Divider */}
+                <ScrollSection height="min-h-[20vh]">
+                  <div className="flex justify-center">
+                    <div className="w-12 h-px bg-slate-300 dark:bg-slate-700" />
+                  </div>
+                </ScrollSection>
+
+                {/* About Me heading */}
+                <FadeInBlock>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100">
+                    <span className="text-blue-500 dark:text-blue-400">✦</span> about me
+                  </h1>
+                </FadeInBlock>
+
+                {/* Hobbies */}
+                <HobbiesSection />
+
+                {/* Quick Facts */}
+                <QuickFacts />
+
               </div>
             </div>
 
@@ -652,7 +1061,7 @@ const Portfolio = () => {
 
             <div className="bg-white dark:bg-slate-800/50 rounded-2xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-800 mb-6 sm:mb-8 hover:shadow-lg transition-shadow duration-300">
               <div className="aspect-video overflow-hidden">
-                <img src="/images/featured.jpg" alt="Featured Content" className="w-full h-full object-cover" />
+                <img src="/images/featured.png" alt="Featured Content" className="w-full h-full object-cover" />
               </div>
               <div className="p-6 sm:p-8">
                 <h3 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">@ethanzhouwealth</h3>
