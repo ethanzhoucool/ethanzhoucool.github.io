@@ -966,7 +966,12 @@ const Portfolio = () => {
 
         {/* ═══ ABOUT — Scroll-driven storytelling ═══ */}
         {activeTab === 'about' && (
-          <div className="-mx-6 -mt-4">
+          <motion.div
+            className="-mx-6 -mt-4"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          >
 
             {/* Section 1: Hero Quote — full viewport, fades/scales on scroll */}
             <HeroQuote />
@@ -1073,7 +1078,7 @@ const Portfolio = () => {
               </div>
             </div>
 
-          </div>
+          </motion.div>
         )}
 
         {/* ═══ PROJECTS ═══ */}
