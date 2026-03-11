@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, useScroll, useTransform, useInView, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, useSpring, AnimatePresence } from 'framer-motion';
 import { Users, Eye, Mail, Instagram, Linkedin, Youtube, BarChart3, ArrowRight, Sun, Moon } from 'lucide-react';
 
 /* ─── Scroll-reveal section wrapper — scroll-progress driven ─── */
@@ -450,10 +450,12 @@ const FadeInBlock = ({ children, className = '' }) => {
   );
 };
 
-/* ─── Hobbies grid with staggered children ─── */
+/* ─── Hobbies grid with click-to-expand ─── */
 const HobbiesSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-5% 0px -5% 0px' });
+  const [activeHobby, setActiveHobby] = useState(null);
+
   const hobbies = [
     { type: 'video', src: '/images/jiujitsu.mp4', label: 'jiu jitsu' },
     { type: 'img', src: '/images/badminton.jpg', label: 'badminton' },
@@ -479,14 +481,17 @@ const HobbiesSection = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 transition={{ duration: 0.6, delay: 0.1 + i * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-                className="bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow duration-300"
+                className="group cursor-pointer bg-white dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                onClick={() => setActiveHobby(hobby)}
+                data-hover
               >
                 <div className="aspect-square relative overflow-hidden">
                   {hobby.type === 'video' ? (
-                    <video src={hobby.src} className="w-full h-full object-cover" autoPlay loop muted playsInline />
+                    <video src={hobby.src} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" autoPlay loop muted playsInline />
                   ) : (
-                    <img src={hobby.src} alt={hobby.label} className="w-full h-full object-cover" />
+                    <img src={hobby.src} alt={hobby.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   )}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                 </div>
                 <div className="p-3 sm:p-4 text-center">
                   <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">{hobby.label}</h3>
@@ -496,6 +501,39 @@ const HobbiesSection = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Fullscreen modal overlay */}
+      <AnimatePresence>
+        {activeHobby && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 sm:p-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActiveHobby(null)}
+          >
+            <motion.div
+              className="relative w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="aspect-square sm:aspect-[4/3] relative overflow-hidden">
+                {activeHobby.type === 'video' ? (
+                  <video src={activeHobby.src} className="w-full h-full object-cover" autoPlay loop muted playsInline />
+                ) : (
+                  <img src={activeHobby.src} alt={activeHobby.label} className="w-full h-full object-cover" />
+                )}
+              </div>
+              <div className="p-5 sm:p-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{activeHobby.label}</h3>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
