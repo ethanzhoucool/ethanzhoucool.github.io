@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, useScroll, useTransform, useInView, useSpring, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from 'framer-motion';
 import { Users, Eye, Mail, Instagram, Linkedin, Youtube, BarChart3, ArrowRight, Sun, Moon } from 'lucide-react';
 
 /* ─── Scroll-reveal section wrapper — scroll-progress driven ─── */
@@ -79,7 +79,7 @@ const ObsessionStatement = () => {
   const words = ["I'm", 'obsessed', 'with', 'this', 'idea.'];
 
   return (
-    <div ref={ref} className="relative h-[325vh]">
+    <div ref={ref} className="relative h-[400vh]">
       <div className="sticky top-0 h-screen flex items-center justify-center px-6">
         <p className="text-2xl sm:text-3xl md:text-4xl text-slate-800 dark:text-slate-100 text-center font-medium leading-snug flex flex-wrap justify-center gap-x-[0.3em] max-w-2xl">
           {words.map((word, i) => (
@@ -110,7 +110,7 @@ const JudoQuote = () => {
   const smoothUnderline = useSpring(underlineScale, { stiffness: 120, damping: 30 });
 
   return (
-    <div ref={ref} className="relative h-[375vh]">
+    <div ref={ref} className="relative h-[575vh]">
       <div className="sticky top-0 h-screen flex items-center justify-center px-6">
         <div className="text-center space-y-4 sm:space-y-6 max-w-2xl">
           <motion.p
@@ -242,12 +242,62 @@ const HeroQuote = () => {
 /* ─── "Leverage" section — scroll-progress fade-in ─── */
 const LeverageSection = () => {
   const ref = useRef(null);
+  const wordRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'start 0.35'],
   });
+  const isInView = useInView(ref, { amount: 0.35 });
   const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
   const y = useTransform(scrollYProgress, [0, 1], [40, 0]);
+  const rotateX = useMotionValue(0);
+  const rotateY = useMotionValue(0);
+  const glowX = useMotionValue(50);
+  const glowY = useMotionValue(50);
+  const smoothRotateX = useSpring(rotateX, { stiffness: 180, damping: 20, mass: 0.7 });
+  const smoothRotateY = useSpring(rotateY, { stiffness: 180, damping: 20, mass: 0.7 });
+  const glow = useMotionTemplate`radial-gradient(circle at ${glowX}% ${glowY}%, rgba(96, 165, 250, 0.32), rgba(96, 165, 250, 0.12) 20%, rgba(96, 165, 250, 0) 58%)`;
+  const textShadow = useMotionTemplate`${smoothRotateY}px ${smoothRotateX}px 28px rgba(59, 130, 246, 0.2)`;
+
+  const handleWindowMouseMove = useCallback((event) => {
+    const word = wordRef.current;
+    if (!word) return;
+
+    const rect = word.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const x = Math.max(-1, Math.min(1, (event.clientX - centerX) / (window.innerWidth * 0.35)));
+    const yPos = Math.max(-1, Math.min(1, (event.clientY - centerY) / (window.innerHeight * 0.35)));
+    const glowPosX = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
+    const glowPosY = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100));
+
+    rotateY.set(x * 18);
+    rotateX.set(yPos * -18);
+    glowX.set(glowPosX);
+    glowY.set(glowPosY);
+  }, [glowX, glowY, rotateX, rotateY]);
+
+  const resetWordTilt = useCallback(() => {
+    rotateX.set(0);
+    rotateY.set(0);
+    glowX.set(50);
+    glowY.set(50);
+  }, [glowX, glowY, rotateX, rotateY]);
+
+  useEffect(() => {
+    if (!isInView) {
+      resetWordTilt();
+      return undefined;
+    }
+
+    window.addEventListener('mousemove', handleWindowMouseMove);
+    window.addEventListener('mouseleave', resetWordTilt);
+
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('mouseleave', resetWordTilt);
+    };
+  }, [handleWindowMouseMove, isInView, resetWordTilt]);
 
   return (
     <div ref={ref} className="min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center px-6">
@@ -258,9 +308,33 @@ const LeverageSection = () => {
         <p className="text-xl sm:text-2xl md:text-3xl text-slate-600 dark:text-slate-300 leading-relaxed">
           The ultimate concept between these two ideas is
         </p>
-        <p className="text-5xl sm:text-6xl md:text-8xl font-playfair font-bold text-slate-800 dark:text-slate-100 mt-3 sm:mt-4">
-          leverage.
-        </p>
+        <div className="mt-3 sm:mt-4 flex justify-center [perspective:1400px]">
+          <motion.p
+            ref={wordRef}
+            style={{
+              rotateX: smoothRotateX,
+              rotateY: smoothRotateY,
+              textShadow,
+              transformStyle: 'preserve-3d',
+            }}
+            animate={{ scale: isInView ? 1.02 : 1 }}
+            transition={{ type: 'spring', stiffness: 220, damping: 18 }}
+            className="relative cursor-default select-none px-6 py-3 text-5xl sm:text-6xl md:text-8xl font-playfair font-bold text-slate-800 dark:text-slate-100"
+          >
+            <motion.span
+              aria-hidden="true"
+              style={{ backgroundImage: glow }}
+              className="pointer-events-none absolute inset-[-18%] rounded-full opacity-90 blur-3xl"
+            />
+            <span className="block [transform:translateZ(36px)]">leverage.</span>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 flex items-center justify-center text-blue-500/10 blur-2xl [transform:translateZ(-18px)] dark:text-blue-300/10"
+            >
+              leverage.
+            </span>
+          </motion.p>
+        </div>
       </motion.div>
     </div>
   );
@@ -1024,13 +1098,72 @@ const Portfolio = () => {
             <LeverageSection />
 
             {/* Section 5: Philosophy Explanation */}
-            <ScrollSection height="min-h-[60vh] sm:min-h-[70vh]">
-              <p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed sm:leading-loose text-center">
-                Every action should maximize the ratio of results to effort. It's about placing small bets where the upside is{' '}
-                <strong className="text-slate-800 dark:text-slate-100 font-semibold">enormous</strong>{' '}
-                and the downside is{' '}
-                <strong className="text-slate-800 dark:text-slate-100 font-semibold">negligible</strong>.
-              </p>
+            <ScrollSection height="min-h-[190vh] sm:min-h-[220vh] md:min-h-[240vh]">
+              <div className="text-center max-w-3xl mx-auto space-y-12 sm:space-y-16 md:space-y-20 py-16 sm:py-24 md:py-32">
+                <p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Every{' '}
+                  <motion.span
+                    animate={{ rotate: [0, -5, 4, -3, 0], y: [0, -4, 2, -2, 0], scale: [1, 1.08, 1.03, 1] }}
+                    transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 1.1, ease: 'easeInOut' }}
+                    className="inline-block font-semibold text-slate-800 dark:text-slate-100"
+                  >
+                    action
+                  </motion.span>{' '}
+                  should
+                </p>
+
+                <p className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+                  maximize
+                </p>
+
+                <div className="flex flex-col items-center gap-8 sm:gap-12 md:gap-16">
+                  <p className="text-sm sm:text-base md:text-lg uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500">
+                    the ratio of
+                  </p>
+                  <div className="inline-flex flex-col items-center leading-none">
+                    <span className="text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-800 dark:text-slate-100">
+                      results
+                    </span>
+                    <span className="my-2 h-px w-28 sm:w-36 md:w-44 bg-slate-300 dark:bg-slate-600" />
+                    <span className="text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-500 dark:text-slate-400">
+                      effort
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-52 sm:pt-72 md:pt-[26rem]">
+                  <div className="mx-auto max-w-3xl px-2 sm:px-4">
+                    <p className="text-sm sm:text-base md:text-lg uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
+                      asymmetry matters
+                    </p>
+                    <p className="mt-3 text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed sm:leading-loose">
+                      It&apos;s about placing
+                      <span className="mx-2 inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-sm sm:text-base text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                        small bets
+                      </span>
+                      where the
+                    </p>
+                    <div className="mt-8 grid gap-4 sm:grid-cols-[2.15fr_0.85fr] sm:gap-5 items-end">
+                      <motion.div
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.2, ease: 'easeInOut' }}
+                        className="rounded-2xl border border-blue-200 bg-blue-50 px-5 py-6 sm:px-6 sm:py-7 text-left overflow-hidden dark:border-blue-500/20 dark:bg-blue-500/10"
+                      >
+                        <p className="text-xs uppercase tracking-[0.22em] text-blue-500 dark:text-blue-300">upside</p>
+                        <p className="mt-3 text-[clamp(2.1rem,6.2vw,4rem)] leading-[0.98] font-semibold tracking-tight text-blue-700 dark:text-blue-300">enormous</p>
+                      </motion.div>
+                      <motion.div
+                        animate={{ y: [0, 4, 0] }}
+                        transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.2, ease: 'easeInOut', delay: 0.2 }}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-left self-end dark:border-slate-700 dark:bg-slate-800/70"
+                      >
+                        <p className="text-xs uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">downside</p>
+                        <p className="mt-2 text-xl sm:text-2xl md:text-3xl font-semibold text-slate-700 dark:text-slate-200">negligible</p>
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </ScrollSection>
 
             {/* Section 6: Example Callout Cards */}
