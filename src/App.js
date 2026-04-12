@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, useScroll, useTransform, useInView, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from 'framer-motion';
 import { Users, Eye, Mail, Instagram, Linkedin, Youtube, BarChart3, ArrowRight, Sun, Moon } from 'lucide-react';
 
@@ -41,28 +41,40 @@ const SlideCard = ({ children, from = 'left', delay = 0, className = '' }) => {
   );
 };
 
-/* ─── Obsession statement — sticky scroll-locked word reveal ─── */
-const ObsessionWord = ({ word, progress, index, total }) => {
-  const start = 0.15 + (index / total) * 0.55;
-  const end = start + 0.55 / total;
-  const opacity = useTransform(progress, [start, end], [0, 1]);
-  const y = useTransform(progress, [start, end], [25, 0]);
-  const blur = useTransform(progress, [start, end], [8, 0]);
-  const filter = useTransform(blur, (v) => `blur(${v}px)`);
+/* ─── Obsession statement — gravitational vortex ─── */
+const VortexWord = ({ word, progress, index, startX, startY, startRotate }) => {
+  const isObsessed = word === 'obsessed';
 
-  // Shimmer effect for "obsessed" - scroll-driven
-  const shimmerPos = useTransform(progress, [0.6, 0.85], [-200, 200]);
+  /* Timing: "obsessed" appears first (gravitational center), others orbit in after */
+  const adjustedIdx = index > 1 ? index - 1 : index;
+  const start = isObsessed ? 0.06 : 0.14 + adjustedIdx * 0.06;
+  const end = isObsessed ? 0.25 : start + 0.22;
+
+  /* Orbital position → reading position */
+  const x = useTransform(progress, [start, end], [startX, 0]);
+  const y = useTransform(progress, [start, end], [startY, 0]);
+  const rotate = useTransform(progress, [start, end], [startRotate, 0]);
+  const opacity = useTransform(progress, [start, start + 0.1], [0, 1]);
+  const convergenceScale = useTransform(progress, [start, end], [0.8, 1]);
+
+  /* "obsessed": convergence then heartbeat pulse */
+  const obsessedScale = useTransform(progress,
+    [0.06, 0.25, 0.5, 0.55, 0.6, 0.65, 0.7],
+    [0.8, 1, 1, 1.08, 1, 1.05, 1]
+  );
+
+  /* Shimmer on "obsessed" */
+  const shimmerPos = useTransform(progress, [0.65, 0.88], [-200, 200]);
   const backgroundPosition = useTransform(shimmerPos, (v) => `${v}% center`);
 
   return (
     <motion.span
       style={{
-        opacity,
-        y,
-        filter,
-        ...(word === 'obsessed' && { backgroundPosition }),
+        x, y, rotate, opacity,
+        scale: isObsessed ? obsessedScale : convergenceScale,
+        ...(isObsessed && { backgroundPosition }),
       }}
-      className={word === 'obsessed' ? 'obsession-shimmer font-semibold' : ''}
+      className={isObsessed ? 'obsession-shimmer font-semibold' : ''}
     >
       {word}
     </motion.span>
@@ -76,16 +88,50 @@ const ObsessionStatement = () => {
     offset: ['start start', 'end start'],
   });
 
-  const words = ["I'm", 'obsessed', 'with', 'this', 'idea.'];
+  const words = useMemo(() => [
+    { text: "I'm", startX: -140, startY: -70, startRotate: -20 },
+    { text: 'obsessed', startX: 0, startY: 0, startRotate: 0 },
+    { text: 'with', startX: 130, startY: -55, startRotate: 12 },
+    { text: 'this', startX: -100, startY: 65, startRotate: -8 },
+    { text: 'idea.', startX: 150, startY: 50, startRotate: 15 },
+  ], []);
+
+  /* Concentric rings — contract inward as words converge */
+  const ring1Scale = useTransform(scrollYProgress, [0.1, 0.65], [2.5, 0.3]);
+  const ring2Scale = useTransform(scrollYProgress, [0.15, 0.7], [2, 0.25]);
+  const ring3Scale = useTransform(scrollYProgress, [0.2, 0.75], [1.6, 0.2]);
+  const ringOpacity = useTransform(scrollYProgress, [0.08, 0.25, 0.65, 0.8], [0, 0.18, 0.18, 0]);
 
   return (
-    <div ref={ref} className="relative h-[400vh]">
+    <div ref={ref} className="relative h-[250vh]">
       <div className="sticky top-0 h-screen flex items-center justify-center px-6">
-        <p className="text-2xl sm:text-3xl md:text-4xl text-slate-800 dark:text-slate-100 text-center font-medium leading-snug flex flex-wrap justify-center gap-x-[0.3em] max-w-2xl">
-          {words.map((word, i) => (
-            <ObsessionWord key={i} word={word} progress={scrollYProgress} index={i} total={words.length} />
-          ))}
-        </p>
+        <div className="relative max-w-2xl">
+          {/* Concentric rings — vortex visual */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            <svg width="300" height="300" viewBox="-150 -150 300 300" className="overflow-visible">
+              <motion.circle cx="0" cy="0" r="80" fill="none" strokeWidth="1"
+                className="stroke-blue-400 dark:stroke-blue-300"
+                style={{ scale: ring1Scale, opacity: ringOpacity }}
+              />
+              <motion.circle cx="0" cy="0" r="60" fill="none" strokeWidth="1"
+                className="stroke-blue-400 dark:stroke-blue-300"
+                style={{ scale: ring2Scale, opacity: ringOpacity }}
+              />
+              <motion.circle cx="0" cy="0" r="40" fill="none" strokeWidth="1"
+                className="stroke-blue-400 dark:stroke-blue-300"
+                style={{ scale: ring3Scale, opacity: ringOpacity }}
+              />
+            </svg>
+          </div>
+
+          {/* Words — orbit inward toward "obsessed" */}
+          <p className="relative z-10 text-2xl sm:text-3xl md:text-4xl text-slate-800 dark:text-slate-100 text-center font-medium leading-snug flex flex-wrap justify-center gap-x-[0.3em]">
+            {words.map((w, i) => (
+              <VortexWord key={i} word={w.text} progress={scrollYProgress} index={i}
+                startX={w.startX} startY={w.startY} startRotate={w.startRotate} />
+            ))}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -110,7 +156,7 @@ const JudoQuote = () => {
   const smoothUnderline = useSpring(underlineScale, { stiffness: 120, damping: 30 });
 
   return (
-    <div ref={ref} className="relative h-[575vh]">
+    <div ref={ref} className="relative h-[350vh]">
       <div className="sticky top-0 h-screen flex items-center justify-center px-6">
         <div className="text-center space-y-4 sm:space-y-6 max-w-2xl">
           <motion.p
@@ -179,8 +225,27 @@ const HeroQuote = () => {
 
   const scrollIndicatorOpacity = useTransform(enterProgress, [0.6, 0.85], [0, 1]);
 
+  /* Premium blur-to-sharp reveals */
+  const tagBlur = useTransform(enterProgress, [0, 0.15], [4, 0]);
+  const tagFilter = useTransform(tagBlur, (v) => `blur(${v}px)`);
+  const titleBlur = useTransform(enterProgress, [0.1, 0.3], [12, 0]);
+  const titleFilter = useTransform(titleBlur, (v) => `blur(${v}px)`);
+  const titleScale = useTransform(enterProgress, [0.1, 0.35], [0.97, 1]);
+  const quoteBlur = useTransform(enterProgress, [0.4, 0.65], [8, 0]);
+  const quoteFilter = useTransform(quoteBlur, (v) => `blur(${v}px)`);
+
+  /* "Asymmetric" split — halves collide from opposite sides */
+  const asymX = useTransform(enterProgress, [0.1, 0.3], [-120, 0]);
+  const asymScale = useTransform(enterProgress, [0.1, 0.3], [1.15, 1]);
+  const asymSpringX = useSpring(asymX, { stiffness: 200, damping: 20 });
+  const asymSpringScale = useSpring(asymScale, { stiffness: 200, damping: 20 });
+  const metricX = useTransform(enterProgress, [0.1, 0.3], [80, 0]);
+  const metricScale = useTransform(enterProgress, [0.1, 0.3], [0.85, 1]);
+  const metricSpringX = useSpring(metricX, { stiffness: 200, damping: 20 });
+  const metricSpringScale = useSpring(metricScale, { stiffness: 200, damping: 20 });
+
   return (
-    <div ref={heroRef} className="min-h-[85vh] relative overflow-hidden">
+    <div ref={heroRef} className="min-h-[85vh] relative">
       <motion.div
         ref={contentRef}
         style={{ opacity: fadeOut, scale: scaleOut, y: yOut }}
@@ -188,7 +253,7 @@ const HeroQuote = () => {
       >
         {/* MY PHILOSOPHY — tiny uppercase tag */}
         <motion.p
-          style={{ opacity: tagOpacity, y: tagY }}
+          style={{ opacity: tagOpacity, y: tagY, filter: tagFilter }}
           className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-slate-400 dark:text-slate-500 mb-6 sm:mb-8 md:mb-10 font-medium"
         >
           my philosophy
@@ -196,11 +261,18 @@ const HeroQuote = () => {
 
         {/* ASYMMETRIC RISK — massive bold heading */}
         <motion.div
-          style={{ opacity: titleOpacity, y: titleY }}
-          className="mb-5 sm:mb-7"
+          style={{ opacity: titleOpacity, y: titleY, filter: titleFilter, scale: titleScale }}
+          className="mb-5 sm:mb-7 relative"
         >
-          <h1 className="font-bold text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight leading-[0.9] text-slate-800 dark:text-slate-100">
-            <span className="text-blue-600 dark:text-blue-400">Asymmetric</span>
+          <motion.div
+            style={{ opacity: titleOpacity }}
+            className="absolute -inset-16 sm:-inset-24 bg-blue-500/[0.07] dark:bg-blue-400/[0.1] rounded-[80px] blur-[100px] pointer-events-none"
+          />
+          <h1 className="relative font-bold text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight leading-[0.9] text-slate-800 dark:text-slate-100">
+            <span className="text-blue-600 dark:text-blue-400 inline-flex">
+              <motion.span style={{ x: asymSpringX, scale: asymSpringScale }} className="inline-block origin-right">Asym</motion.span>
+              <motion.span style={{ x: metricSpringX, scale: metricSpringScale }} className="inline-block origin-left">metric</motion.span>
+            </span>
             <br />
             risk
           </h1>
@@ -216,7 +288,7 @@ const HeroQuote = () => {
 
         {/* Definition — smaller serif, generous line height */}
         <motion.blockquote
-          style={{ opacity: quoteOpacity, y: quoteY }}
+          style={{ opacity: quoteOpacity, y: quoteY, filter: quoteFilter }}
           className="max-w-lg"
         >
           <p className="font-playfair text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed sm:leading-[1.8] font-normal">
@@ -239,103 +311,148 @@ const HeroQuote = () => {
   );
 };
 
-/* ─── "Leverage" section — scroll-progress fade-in ─── */
+/* ─── "Leverage" section — interactive SVG lever mechanism ─── */
 const LeverageSection = () => {
   const ref = useRef(null);
-  const wordRef = useRef(null);
+  const svgRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start end', 'start 0.35'],
+    offset: ['start start', 'end start'],
   });
-  const isInView = useInView(ref, { amount: 0.35 });
-  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const y = useTransform(scrollYProgress, [0, 1], [40, 0]);
-  const rotateX = useMotionValue(0);
-  const rotateY = useMotionValue(0);
-  const glowX = useMotionValue(50);
-  const glowY = useMotionValue(50);
-  const smoothRotateX = useSpring(rotateX, { stiffness: 180, damping: 20, mass: 0.7 });
-  const smoothRotateY = useSpring(rotateY, { stiffness: 180, damping: 20, mass: 0.7 });
-  const glow = useMotionTemplate`radial-gradient(circle at ${glowX}% ${glowY}%, rgba(96, 165, 250, 0.32), rgba(96, 165, 250, 0.12) 20%, rgba(96, 165, 250, 0) 58%)`;
-  const textShadow = useMotionTemplate`${smoothRotateY}px ${smoothRotateX}px 28px rgba(59, 130, 246, 0.2)`;
+  const isInView = useInView(ref, { amount: 0.15 });
 
-  const handleWindowMouseMove = useCallback((event) => {
-    const word = wordRef.current;
-    if (!word) return;
+  /* Section entrance */
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.12], [0, 1]);
+  const sectionY = useTransform(scrollYProgress, [0, 0.12], [40, 0]);
 
-    const rect = word.getBoundingClientRect();
+  /* "leverage." text — blur-to-sharp */
+  const wordOpacity = useTransform(scrollYProgress, [0.08, 0.22], [0, 1]);
+  const wordBlur = useTransform(scrollYProgress, [0.08, 0.22], [12, 0]);
+  const wordFilter = useTransform(wordBlur, (v) => `blur(${v}px)`);
+
+  /* Beam rotation — scroll-driven primary + mouse-driven secondary */
+  const scrollTilt = useTransform(scrollYProgress, [0.2, 0.65], [0, -14]);
+  const mouseTilt = useMotionValue(0);
+  const smoothMouseTilt = useSpring(mouseTilt, { stiffness: 150, damping: 25 });
+  const beamAngle = useTransform([scrollTilt, smoothMouseTilt], ([s, m]) => s + m);
+  const smoothBeam = useSpring(beamAngle, { stiffness: 120, damping: 20 });
+
+  /* Result glow intensifies as beam tips */
+  const resultGlow = useTransform(scrollYProgress, [0.45, 0.65], [0, 0.5]);
+
+  /* Labels + SVG entrance */
+  const labelOpacity = useTransform(scrollYProgress, [0.3, 0.5], [0, 1]);
+  const svgOpacity = useTransform(scrollYProgress, [0.14, 0.28], [0, 1]);
+  const svgY = useTransform(scrollYProgress, [0.14, 0.28], [20, 0]);
+
+  /* Mouse handlers — tilt beam on hover */
+  const handleMouseMove = useCallback((event) => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const rect = svg.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const x = Math.max(-1, Math.min(1, (event.clientX - centerX) / (window.innerWidth * 0.35)));
-    const yPos = Math.max(-1, Math.min(1, (event.clientY - centerY) / (window.innerHeight * 0.35)));
-    const glowPosX = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
-    const glowPosY = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100));
+    const x = Math.max(-1, Math.min(1, (event.clientX - centerX) / (rect.width / 2)));
+    mouseTilt.set(x * -6);
+  }, [mouseTilt]);
 
-    rotateY.set(x * 18);
-    rotateX.set(yPos * -18);
-    glowX.set(glowPosX);
-    glowY.set(glowPosY);
-  }, [glowX, glowY, rotateX, rotateY]);
-
-  const resetWordTilt = useCallback(() => {
-    rotateX.set(0);
-    rotateY.set(0);
-    glowX.set(50);
-    glowY.set(50);
-  }, [glowX, glowY, rotateX, rotateY]);
+  const resetTilt = useCallback(() => {
+    mouseTilt.set(0);
+  }, [mouseTilt]);
 
   useEffect(() => {
     if (!isInView) {
-      resetWordTilt();
+      resetTilt();
       return undefined;
     }
-
-    window.addEventListener('mousemove', handleWindowMouseMove);
-    window.addEventListener('mouseleave', resetWordTilt);
-
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseleave', resetTilt);
     return () => {
-      window.removeEventListener('mousemove', handleWindowMouseMove);
-      window.removeEventListener('mouseleave', resetWordTilt);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseleave', resetTilt);
     };
-  }, [handleWindowMouseMove, isInView, resetWordTilt]);
+  }, [handleMouseMove, isInView, resetTilt]);
 
   return (
-    <div ref={ref} className="min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center px-6">
-      <motion.div
-        style={{ opacity, y }}
-        className="text-center max-w-2xl mx-auto"
-      >
-        <p className="text-xl sm:text-2xl md:text-3xl text-slate-600 dark:text-slate-300 leading-relaxed">
-          The ultimate concept between these two ideas is
-        </p>
-        <div className="mt-3 sm:mt-4 flex justify-center [perspective:1400px]">
+    <div ref={ref} className="relative h-[140vh]">
+      <div className="sticky top-0 h-screen flex items-center justify-center px-6">
+        <motion.div
+          style={{ opacity: sectionOpacity, y: sectionY }}
+          className="text-center max-w-2xl mx-auto"
+        >
+          <p className="text-xl sm:text-2xl md:text-3xl text-slate-600 dark:text-slate-300 leading-relaxed">
+            The ultimate concept between these two ideas is
+          </p>
           <motion.p
-            ref={wordRef}
-            style={{
-              rotateX: smoothRotateX,
-              rotateY: smoothRotateY,
-              textShadow,
-              transformStyle: 'preserve-3d',
-            }}
-            animate={{ scale: isInView ? 1.02 : 1 }}
-            transition={{ type: 'spring', stiffness: 220, damping: 18 }}
-            className="relative cursor-default select-none px-6 py-3 text-5xl sm:text-6xl md:text-8xl font-playfair font-bold text-slate-800 dark:text-slate-100"
+            style={{ opacity: wordOpacity, filter: wordFilter }}
+            className="mt-3 sm:mt-4 text-5xl sm:text-6xl md:text-8xl font-playfair font-bold text-slate-800 dark:text-slate-100"
           >
-            <motion.span
-              aria-hidden="true"
-              style={{ backgroundImage: glow }}
-              className="pointer-events-none absolute inset-[-18%] rounded-full opacity-90 blur-3xl"
-            />
-            <span className="block [transform:translateZ(36px)]">leverage.</span>
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 flex items-center justify-center text-blue-500/10 blur-2xl [transform:translateZ(-18px)] dark:text-blue-300/10"
-            >
-              leverage.
-            </span>
+            leverage.
           </motion.p>
-        </div>
-      </motion.div>
+
+          {/* SVG Lever Mechanism */}
+          <motion.div
+            style={{ opacity: svgOpacity, y: svgY }}
+            className="mt-8 sm:mt-12 w-full max-w-md mx-auto"
+          >
+            <svg
+              ref={svgRef}
+              viewBox="0 0 400 100"
+              className="w-full overflow-visible"
+              role="img"
+              aria-label="Lever showing small effort producing large result"
+            >
+              {/* Fulcrum — off-center triangle at 35% */}
+              <polygon
+                points="140,36 126,70 154,70"
+                className="fill-slate-200 dark:fill-slate-700"
+              />
+
+              {/* Beam group — rotates around fulcrum point (140, 30) */}
+              <g transform="translate(140, 30)">
+                <motion.g style={{ rotate: smoothBeam }}>
+                  <g transform="translate(-140, -30)">
+                    {/* Beam bar */}
+                    <rect x="15" y="28" width="370" height="4" rx="2" className="fill-slate-300 dark:fill-slate-600" />
+
+                    {/* Effort ball — small, on short arm */}
+                    <circle cx="55" cy="18" r="10" className="fill-slate-300 dark:fill-slate-500" />
+
+                    {/* Result ball — large, on long arm */}
+                    <circle cx="330" cy="10" r="20" className="fill-blue-500 dark:fill-blue-400" />
+
+                    {/* Result glow ring */}
+                    <motion.circle
+                      cx="330" cy="10" r="28"
+                      fill="none"
+                      className="stroke-blue-400 dark:stroke-blue-300"
+                      strokeWidth="1.5"
+                      style={{ opacity: resultGlow }}
+                    />
+                  </g>
+                </motion.g>
+              </g>
+
+              {/* Labels — fixed position below mechanism */}
+              <motion.g style={{ opacity: labelOpacity }}>
+                <text
+                  x="55" y="88" textAnchor="middle"
+                  className="fill-slate-400 dark:fill-slate-500"
+                  style={{ fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}
+                >
+                  effort
+                </text>
+                <text
+                  x="330" y="88" textAnchor="middle"
+                  className="fill-blue-500 dark:fill-blue-400"
+                  style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}
+                >
+                  result
+                </text>
+              </motion.g>
+            </svg>
+          </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };
@@ -345,19 +462,79 @@ const FinalStatement = () => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start end', 'start 0.35'],
+    offset: ['start end', 'start 0.25'],
   });
-  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const scale = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
+
+  /* "I'd rather take" — enters light and fast */
+  const line1Opacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+  const line1Y = useTransform(scrollYProgress, [0, 0.3], [30, 0]);
+
+  /* "asymmetric" — enters heavy with spring overshoot */
+  const asymWordOpacity = useTransform(scrollYProgress, [0.15, 0.45], [0, 1]);
+  const asymWordY = useTransform(scrollYProgress, [0.15, 0.55], [80, 0]);
+  const asymWordSpringY = useSpring(asymWordY, { stiffness: 180, damping: 12, mass: 1.5 });
+
+  /* "risks." — snaps in after "asymmetric" lands */
+  const risksOpacity = useTransform(scrollYProgress, [0.5, 0.7], [0, 1]);
+  const risksY = useTransform(scrollYProgress, [0.5, 0.7], [15, 0]);
+
+  /* Container micro-shake when "asymmetric" lands */
+  const shakeX = useTransform(scrollYProgress, [0.52, 0.54, 0.56, 0.58], [0, -2, 2, 0]);
+  const shakeY = useTransform(scrollYProgress, [0.52, 0.54, 0.56, 0.58], [0, 1, -1, 0]);
+
+  /* Shockwave ring expands outward from "asymmetric" */
+  const ringScale = useTransform(scrollYProgress, [0.48, 0.72], [0, 3]);
+  const ringOpacity = useTransform(scrollYProgress, [0.48, 0.58, 0.72], [0, 0.2, 0]);
+
+  /* Ambient glow */
+  const glowOpacity = useTransform(scrollYProgress, [0.3, 0.6], [0, 1]);
 
   return (
-    <div ref={ref} className="min-h-[70vh] sm:min-h-[85vh] flex items-center justify-center px-6">
-      <motion.div style={{ opacity, scale }} className="text-center">
-        <p className="font-playfair text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-800 dark:text-slate-100 leading-tight">
-          I'd rather take
-          <br />
-          <span className="text-blue-600 dark:text-blue-400">asymmetric</span> risks.
-        </p>
+    <div ref={ref} className="min-h-[85vh] sm:min-h-[100vh] flex items-center justify-center px-6">
+      <motion.div style={{ x: shakeX, y: shakeY }} className="text-center relative">
+        {/* Ambient glow */}
+        <motion.div
+          style={{ opacity: glowOpacity }}
+          className="absolute -inset-16 sm:-inset-24 bg-blue-500/[0.08] dark:bg-blue-400/[0.12] rounded-full blur-[120px] pointer-events-none"
+        />
+
+        <div className="relative">
+          {/* "I'd rather take" — light, fast */}
+          <motion.p
+            style={{ opacity: line1Opacity, y: line1Y }}
+            className="font-playfair text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-800 dark:text-slate-100 leading-tight"
+          >
+            I'd rather take
+          </motion.p>
+
+          {/* "asymmetric" — heavy weight drop */}
+          <div className="relative inline-block mt-1">
+            {/* Shockwave ring SVG */}
+            <motion.svg
+              style={{ opacity: ringOpacity, scale: ringScale }}
+              className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
+              viewBox="-50 -25 100 50"
+            >
+              <circle cx="0" cy="0" r="30" fill="none" strokeWidth="1"
+                className="stroke-blue-400/60 dark:stroke-blue-300/60" />
+            </motion.svg>
+
+            <motion.span
+              style={{ opacity: asymWordOpacity, y: asymWordSpringY }}
+              className="font-playfair text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-blue-600 dark:text-blue-400 inline-block"
+            >
+              asymmetric
+            </motion.span>
+          </div>
+
+          {/* "risks." — snaps in last */}
+          <motion.span
+            style={{ opacity: risksOpacity, y: risksY }}
+            className="font-playfair text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-800 dark:text-slate-100 inline-block ml-3 sm:ml-4"
+          >
+            risks.
+          </motion.span>
+        </div>
       </motion.div>
     </div>
   );
@@ -370,6 +547,25 @@ const ScrollWord = ({ word, scrollYProgress, start, end }) => {
   return (
     <motion.span style={{ opacity, y }} className="inline-block mr-[0.3em]">
       {word}
+    </motion.span>
+  );
+};
+
+/* ─── Per-letter wobble for "uncomfortable" ─── */
+const UncomfortableLetter = ({ char, progress, offsetX, offsetScaleY, offsetRotate }) => {
+  const x = useTransform(progress, [0.2, 0.32], [offsetX, 0]);
+  const springX = useSpring(x, { stiffness: 300, damping: 12 });
+  const scaleY = useTransform(progress, [0.2, 0.32], [offsetScaleY, 1]);
+  const springScaleY = useSpring(scaleY, { stiffness: 300, damping: 12 });
+  const rotate = useTransform(progress, [0.2, 0.32], [offsetRotate, 0]);
+  const springRotate = useSpring(rotate, { stiffness: 300, damping: 12 });
+  const opacity = useTransform(progress, [0.2, 0.28], [0, 1]);
+
+  return (
+    <motion.span
+      style={{ x: springX, scaleY: springScaleY, rotate: springRotate, opacity, display: 'inline-block' }}
+    >
+      {char}
     </motion.span>
   );
 };
@@ -387,7 +583,19 @@ const ContrastSection = () => {
 
   /* "uncomfortable" reveal */
   const uncomfOpacity = useTransform(scrollYProgress, [0.2, 0.32], [0, 1]);
-  const uncomfScale = useTransform(scrollYProgress, [0.2, 0.32], [0.8, 1]);
+
+  /* Pre-computed letter offsets for "uncomfortable." wobble */
+  const uncomfLetters = useMemo(() =>
+    'uncomfortable.'.split('').map((char, i) => ({
+      char,
+      offsetX: Math.sin(i * 7.3 + 2.1) * 8,
+      offsetScaleY: 1 + Math.cos(i * 5.7 + 1.3) * 0.05,
+      offsetRotate: Math.sin(i * 4.1 + 3.7) * 3,
+    }))
+  , []);
+
+  /* Brief warm flash during uncomfortable reveal */
+  const warmFlash = useTransform(scrollYProgress, [0.2, 0.26, 0.32], [0, 0.04, 0]);
 
   /* "status quo" */
   const statusOpacity = useTransform(scrollYProgress, [0.32, 0.42], [0, 1]);
@@ -407,7 +615,7 @@ const ContrastSection = () => {
   const labelOpacity = useTransform(scrollYProgress, [0.58, 0.68], [0, 1]);
 
   return (
-    <div ref={ref} className="relative h-[425vh]">
+    <div ref={ref} className="relative h-[280vh]">
       <div className="sticky top-0 h-screen flex items-center justify-center px-6">
         <div className="w-full max-w-2xl mx-auto space-y-10 sm:space-y-14">
 
@@ -437,16 +645,21 @@ const ContrastSection = () => {
           </p>
         </div>
 
-        {/* "because it's uncomfortable" — big dramatic reveal */}
-        <motion.div
-          style={{ opacity: uncomfOpacity, scale: uncomfScale }}
-          className="text-center"
-        >
-          <p className="text-sm sm:text-base text-slate-400 dark:text-slate-500 mb-2">but because it's</p>
-          <p className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
-            uncomfortable.
-          </p>
-        </motion.div>
+        {/* "because it's uncomfortable" — per-letter wobble with warm flash */}
+        <div className="text-center space-y-2">
+          <motion.p style={{ opacity: uncomfOpacity }} className="text-sm sm:text-base text-slate-400 dark:text-slate-500">
+            but because it's
+          </motion.p>
+          <div className="relative inline-block">
+            <motion.div style={{ opacity: warmFlash }} className="absolute -inset-4 bg-red-400/20 dark:bg-red-500/10 rounded-2xl pointer-events-none" />
+            <p className="relative text-4xl sm:text-5xl md:text-6xl font-bold text-slate-800 dark:text-slate-100 tracking-tight inline-flex">
+              {uncomfLetters.map((l, i) => (
+                <UncomfortableLetter key={i} char={l.char} progress={scrollYProgress}
+                  offsetX={l.offsetX} offsetScaleY={l.offsetScaleY} offsetRotate={l.offsetRotate} />
+              ))}
+            </p>
+          </div>
+        </div>
 
         {/* "So they choose the status quo" — faded, smaller */}
         <motion.p
@@ -456,39 +669,44 @@ const ContrastSection = () => {
           So they choose the <span className="italic">status quo</span>.
         </motion.p>
 
-        {/* Symmetric scale visual */}
+        {/* Symmetric scale visual — SVG balanced beam (mirrors the lever, but level) */}
         <motion.div
           style={{ opacity: scaleVisOpacity, y: scaleVisY }}
           className="pt-4 sm:pt-8"
         >
-          <div className="relative flex items-center justify-center gap-4 sm:gap-6">
-            {/* Left side — limited downside */}
-            <motion.div
-              style={{ x: leftX, opacity: leftOpacity }}
-              className="flex-1 text-right"
-            >
-              <p className="text-sm sm:text-base uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1 font-semibold">downside</p>
-              <div className="h-[2px] bg-slate-300 dark:bg-slate-600 rounded-full" />
-              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mt-2 font-semibold">limited</p>
-            </motion.div>
-
-            {/* Center pivot */}
-            <motion.div
-              style={{ scale: pivotScale }}
-              className="flex-shrink-0"
-            >
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-slate-400 dark:bg-slate-500" />
-            </motion.div>
-
-            {/* Right side — limited upside */}
-            <motion.div
-              style={{ x: rightX, opacity: rightOpacity }}
-              className="flex-1 text-left"
-            >
-              <p className="text-sm sm:text-base uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1 font-semibold">upside</p>
-              <div className="h-[2px] bg-slate-300 dark:bg-slate-600 rounded-full" />
-              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mt-2 font-semibold">limited</p>
-            </motion.div>
+          <div className="max-w-xs sm:max-w-sm mx-auto">
+            <svg viewBox="0 0 400 80" className="w-full overflow-visible">
+              {/* Fulcrum — centered at 50% (perfectly symmetric) */}
+              <motion.polygon
+                points="200,36 188,62 212,62"
+                className="fill-slate-200 dark:fill-slate-700"
+                style={{ scale: pivotScale, transformOrigin: '200px 50px' }}
+              />
+              {/* Beam — perfectly level */}
+              <motion.rect
+                x="40" y="28" width="320" height="4" rx="2"
+                className="fill-slate-300 dark:fill-slate-600"
+                style={{ opacity: leftOpacity }}
+              />
+              {/* Equal circles on each end — same size (symmetric) */}
+              <motion.circle cx="80" cy="18" r="14"
+                className="fill-slate-300 dark:fill-slate-500"
+                style={{ x: leftX, opacity: leftOpacity }}
+              />
+              <motion.circle cx="320" cy="18" r="14"
+                className="fill-slate-300 dark:fill-slate-500"
+                style={{ x: rightX, opacity: rightOpacity }}
+              />
+              {/* Labels */}
+              <motion.text x="80" y="75" textAnchor="middle"
+                className="fill-slate-400 dark:fill-slate-500"
+                style={{ opacity: leftOpacity, x: leftX, fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}
+              >downside</motion.text>
+              <motion.text x="320" y="75" textAnchor="middle"
+                className="fill-slate-400 dark:fill-slate-500"
+                style={{ opacity: rightOpacity, x: rightX, fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}
+              >upside</motion.text>
+            </svg>
           </div>
 
           {/* Label underneath */}
@@ -865,6 +1083,24 @@ const FlipPhoto = () => {
   );
 };
 
+/* ─── Scroll-driven ambient atmosphere for about page ─── */
+const AboutAtmosphere = () => {
+  const { scrollYProgress } = useScroll();
+  const x = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 1], [30, 65, 35, 60, 45]);
+  const y = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 1], [20, 50, 65, 30, 45]);
+  const x2 = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 1], [70, 35, 65, 40, 55]);
+  const y2 = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 1], [65, 30, 35, 70, 50]);
+  const op = useTransform(scrollYProgress, [0, 0.03, 0.9, 1], [0, 1, 1, 0]);
+  const bg = useMotionTemplate`radial-gradient(circle at ${x}% ${y}%, rgba(96, 165, 250, 0.06), rgba(96, 165, 250, 0) 85%), radial-gradient(circle at ${x2}% ${y2}%, rgba(59, 130, 246, 0.04), rgba(59, 130, 246, 0) 80%)`;
+
+  return (
+    <motion.div
+      className="fixed inset-0 pointer-events-none"
+      style={{ opacity: op, background: bg }}
+    />
+  );
+};
+
 /* ════════════════════════════════════════
    MAIN PORTFOLIO COMPONENT
    ════════════════════════════════════════ */
@@ -935,12 +1171,12 @@ const Portfolio = () => {
       company: '@ethanzhouwealth',
       period: 'August 2023 – Present',
       location: 'Instagram & TikTok',
-      impact: '5M+',
+      impact: '10M+',
       metric: 'Total Views',
       highlights: [
         'Created 150+ educational finance videos',
-        'Generated 5M+ views across platforms',
-        'Built audience of 20,000+ followers',
+        'Generated 10M+ views across platforms',
+        'Built audience of 22,000+ followers',
         'Focus on investing & personal finance'
       ]
     }
@@ -1078,8 +1314,10 @@ const Portfolio = () => {
 
         {/* ═══ ABOUT — Scroll-driven storytelling ═══ */}
         {activeTab === 'about' && (
+          <>
+          <AboutAtmosphere />
           <motion.div
-            className="-mx-6 -mt-4"
+            className="-mx-6 -mt-4 relative z-[1]"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
@@ -1098,7 +1336,7 @@ const Portfolio = () => {
             <LeverageSection />
 
             {/* Section 5: Philosophy Explanation */}
-            <ScrollSection height="min-h-[190vh] sm:min-h-[220vh] md:min-h-[240vh]">
+            <ScrollSection height="min-h-[120vh] sm:min-h-[140vh] md:min-h-[160vh]">
               <div className="text-center max-w-3xl mx-auto space-y-12 sm:space-y-16 md:space-y-20 py-16 sm:py-24 md:py-32">
                 <p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed">
                   Every{' '}
@@ -1250,6 +1488,7 @@ const Portfolio = () => {
             </div>
 
           </motion.div>
+          </>
         )}
 
         {/* ═══ PROJECTS ═══ */}
@@ -1340,11 +1579,11 @@ const Portfolio = () => {
                 <div className="flex flex-wrap gap-3 mb-6">
                   <div className="flex items-center gap-2 bg-teal-50 dark:bg-teal-900/20 px-3 sm:px-4 py-2 rounded-full border-2 border-teal-200 dark:border-teal-800">
                     <Eye className="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0" />
-                    <span className="text-teal-600 dark:text-teal-400 font-semibold text-xs sm:text-sm">5M+ total views</span>
+                    <span className="text-teal-600 dark:text-teal-400 font-semibold text-xs sm:text-sm">10M+ total views</span>
                   </div>
                   <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-3 sm:px-4 py-2 rounded-full border-2 border-blue-200 dark:border-blue-800">
                     <Users className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                    <span className="text-blue-600 dark:text-blue-400 font-semibold text-xs sm:text-sm">20K+ across tiktok/insta/yt</span>
+                    <span className="text-blue-600 dark:text-blue-400 font-semibold text-xs sm:text-sm">22K+ across tiktok/insta/yt</span>
                   </div>
                   <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/30 px-3 sm:px-4 py-2 rounded-full border-2 border-slate-200 dark:border-slate-700">
                     <BarChart3 className="w-4 h-4 text-slate-600 dark:text-slate-400 flex-shrink-0" />
