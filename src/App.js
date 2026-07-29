@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion, useScroll, useTransform, useInView, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from 'framer-motion';
-import { Users, Eye, Mail, Instagram, Linkedin, Youtube, BarChart3, ArrowRight, Sun, Moon } from 'lucide-react';
+import { motion, useScroll, useTransform, useInView, useSpring, useMotionValue, useMotionTemplate, useReducedMotion, AnimatePresence } from 'framer-motion';
+import { Mail, Instagram, Linkedin, Youtube } from 'lucide-react';
+
+import { useHashRoute } from './useHashRoute';
+import { CustomCursor } from './components/ui';
+import Nav from './components/Nav';
+import Home from './components/Home';
+import Work from './components/Work';
+import Content from './components/Content';
 
 /* ─── Scroll-reveal section wrapper — scroll-progress driven ─── */
 const ScrollSection = ({ children, className = '', height = 'min-h-[70vh]', id }) => {
@@ -15,26 +22,6 @@ const ScrollSection = ({ children, className = '', height = 'min-h-[70vh]', id }
   return (
     <div ref={ref} id={id} className={`${height} flex items-center justify-center px-6 ${className}`}>
       <motion.div style={{ opacity, y }} className="w-full max-w-2xl mx-auto">
-        {children}
-      </motion.div>
-    </div>
-  );
-};
-
-/* ─── Card that slides in from left or right — scroll-progress driven ─── */
-const SlideCard = ({ children, from = 'left', delay = 0, className = '' }) => {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'start 0.4'],
-  });
-  const xStart = from === 'left' ? -80 : 80;
-  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const x = useTransform(scrollYProgress, [0, 1], [xStart, 0]);
-
-  return (
-    <div ref={ref}>
-      <motion.div style={{ opacity, x }} className={className}>
         {children}
       </motion.div>
     </div>
@@ -145,40 +132,90 @@ const JudoQuote = () => {
     offset: ['start start', 'end start'],
   });
 
-  const introOpacity = useTransform(scrollYProgress, [0.05, 0.2], [0, 1]);
-  const introY = useTransform(scrollYProgress, [0.05, 0.2], [15, 0]);
+  /* A sticky child of height 1vh unpins at progress (H - 1) / H, where H is the
+     parent height in viewport units. At H = 2.2 that is 0.545, so every beat
+     below has to land before ~0.52 or it plays after the text has already
+     scrolled off screen. The original 350vh section happened to satisfy this;
+     shortening it without remapping the ranges did not. */
+  const introOpacity = useTransform(scrollYProgress, [0.03, 0.12], [0, 1]);
+  const introY = useTransform(scrollYProgress, [0.03, 0.12], [15, 0]);
 
   const quote = '"maximum efficient use of energy"';
   const chars = quote.split('');
 
-  /* Brush underline draws in after text is revealed */
-  const underlineScale = useTransform(scrollYProgress, [0.7, 0.85], [0, 1]);
+  /* Brush underline draws in once the last character has landed. */
+  const underlineScale = useTransform(scrollYProgress, [0.46, 0.53], [0, 1]);
   const smoothUnderline = useSpring(underlineScale, { stiffness: 120, damping: 30 });
 
+  /* The footage rises with the quote and leaves before the section unpins. */
+  const reduce = useReducedMotion();
+  const videoOpacity = useTransform(scrollYProgress, [0.04, 0.16, 0.46, 0.55], [0, 1, 1, 0]);
+  const videoScale = useTransform(scrollYProgress, [0.04, 0.55], [1.12, 1]);
+
   return (
-    <div ref={ref} className="relative h-[350vh]">
-      <div className="sticky top-0 h-screen flex items-center justify-center px-6">
-        <div className="text-center space-y-4 sm:space-y-6 max-w-2xl">
-          <motion.p
-            style={{ opacity: introOpacity, y: introY }}
-            className="text-slate-500 dark:text-slate-400 text-sm sm:text-base md:text-lg"
+    /* Was 350vh, the largest scroll budget on the whole page, spent on a
+       linear typewriter of 33 characters. */
+    <div ref={ref} className="relative h-[220vh]">
+      <div className="sticky top-0 flex h-screen items-center px-6">
+        {/* Real footage, finally. The narrative ran ~20 screens on three small
+            SVGs and no imagery at all, while this clip of Ethan actually
+            training sat unused in a card grid at the very end. The quote is
+            about judo, so the footage belongs here.
+
+            Framed portrait rather than full-bleed: the source is 1080x1920, so
+            object-cover across a landscape viewport crops away both figures and
+            leaves a band of torsos and the car park behind them.
+
+            This is also the only section on the page that is not centred, which
+            after nineteen centred screens is its own kind of relief. */}
+        {/* Text takes the larger share: at [1.15fr_0.85fr] the quote column was
+            ~460px and "energy" broke across lines mid-word. */}
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-8 md:grid-cols-[0.82fr_1.18fr] md:gap-12">
+          <motion.figure
+            style={{ opacity: reduce ? 1 : videoOpacity, scale: reduce ? 1 : videoScale }}
+            className="m-0 w-full"
           >
-            It's similar to a concept we use in Judo:
-          </motion.p>
-          <p className="font-playfair italic text-2xl sm:text-3xl md:text-4xl text-slate-700 dark:text-slate-200 leading-snug relative inline-block">
+            <div className="overflow-hidden rounded-2xl bg-slate-200 shadow-card ring-1 ring-slate-900/5 dark:bg-slate-800 dark:ring-slate-100/10">
+              <img
+                src="/images/judo-throw.jpg"
+                alt="Ethan mid-throw in a judo gi, loading his opponent onto his hip, in the Western Mustangs wrestling room."
+                width="1800"
+                height="1200"
+                decoding="async"
+                className="aspect-[3/2] w-full object-cover"
+              />
+            </div>
+          </motion.figure>
+
+          <div className="space-y-4 text-left sm:space-y-6">
+            <motion.p
+              style={{ opacity: introOpacity, y: introY }}
+              className="text-slate-500 dark:text-slate-400 text-sm sm:text-base md:text-lg"
+            >
+              It's similar to a concept we use in Judo:
+            </motion.p>
+            <p className="font-playfair italic text-2xl sm:text-3xl md:text-4xl text-slate-700 dark:text-slate-200 leading-snug relative inline-block">
             {chars.map((char, i) => {
-              const start = 0.2 + (i / chars.length) * 0.45;
-              const end = start + 0.45 / chars.length + 0.06;
+              /* Eased rather than linear. Each character used to cost the same
+                 amount of scroll, which for a line about the efficient use of
+                 energy is the wrong feeling. Raising the position to a power
+                 spaces the opening characters roughly 4x further apart than
+                 the closing ones, so the quote takes effort to start and then
+                 finishes itself. */
+              const eased = Math.pow(i / chars.length, 0.7);
+              const start = 0.13 + eased * 0.28;
+              const end = start + 0.28 / chars.length + 0.05;
               return (
                 <JudoChar key={i} char={char} progress={scrollYProgress} start={start} end={end} />
               );
             })}
-            {/* Brush-stroke underline */}
-            <motion.span
-              style={{ scaleX: smoothUnderline, transformOrigin: 'left' }}
-              className="absolute -bottom-2 left-[5%] right-[5%] h-[3px] rounded-full bg-gradient-to-r from-blue-400 via-blue-500 to-blue-400 opacity-60"
-            />
-          </p>
+              {/* Brush-stroke underline */}
+              <motion.span
+                style={{ scaleX: smoothUnderline, transformOrigin: 'left' }}
+                className="absolute -bottom-2 left-0 right-0 h-[3px] rounded-full bg-gradient-to-r from-blue-400 via-blue-500 to-blue-400 opacity-60"
+              />
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -310,7 +347,6 @@ const HeroQuote = () => {
     </div>
   );
 };
-
 /* ─── "Leverage" section — interactive SVG lever mechanism ─── */
 const LeverageSection = () => {
   const ref = useRef(null);
@@ -579,7 +615,7 @@ const ContrastSection = () => {
   });
 
   const words1 = "But most people don't take them.".split(' ');
-  const words2 = 'Not because they cant'.split(' ');
+  const words2 = "Not because they can't".split(' ');
 
   /* "uncomfortable" reveal */
   const uncomfOpacity = useTransform(scrollYProgress, [0.2, 0.32], [0, 1]);
@@ -723,6 +759,454 @@ const ContrastSection = () => {
   );
 };
 
+/* ─── The bets — dealt rather than slid ───────────────────────────
+   These two examples used to arrive on a SlideCard, one from the left and one
+   from the right, which is the most generic scroll effect on the page and had
+   nothing to do with what the cards say.
+
+   The section is about placing small bets, so they are dealt: they come up
+   from below at an angle and settle into a loose fanned stack, the way you
+   would put two cards down on a table.
+   ────────────────────────────────────────────────────────────── */
+const BETS = [
+  {
+    action: 'Send an email to someone you admire.',
+    worst: 'they ignore it.',
+    best: 'it changes your career.',
+    from: { y: 190, rotate: -9 },
+    to: { rotate: -2.2 },
+  },
+  {
+    action: 'Publish your ideas online.',
+    worst: 'no one reads them.',
+    best: 'the right person does.',
+    from: { y: 230, rotate: 9 },
+    to: { rotate: 2.4 },
+  },
+];
+
+const DealtBet = ({ bet, i, progress, reduce }) => {
+  const start = 0.08 + i * 0.13;
+  const end = start + 0.2;
+  const settle = { stiffness: 110, damping: 18 };
+
+  const y = useSpring(useTransform(progress, [start, end], [bet.from.y, 0]), settle);
+  const rotate = useSpring(
+    useTransform(progress, [start, end], [bet.from.rotate, bet.to.rotate]),
+    settle
+  );
+  const opacity = useTransform(progress, [start, start + 0.07], [0, 1]);
+
+  const style = reduce ? {} : { y, rotate, opacity };
+
+  return (
+    <motion.div
+      style={style}
+      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card dark:border-slate-700 dark:bg-slate-800/60 sm:p-8"
+    >
+      <p className="mb-4 text-lg font-semibold text-slate-800 dark:text-slate-100 sm:mb-5 sm:text-xl">
+        {bet.action}
+      </p>
+      <div className="space-y-2 sm:space-y-3">
+        <p className="flex items-start gap-3">
+          <span className="text-lg text-slate-300 dark:text-slate-600 sm:text-xl">↓</span>
+          <span>
+            <span className="font-semibold text-slate-400 dark:text-slate-500">Worst case:</span>{' '}
+            <span className="text-slate-500 dark:text-slate-400">{bet.worst}</span>
+          </span>
+        </p>
+        <p className="flex items-start gap-3">
+          <span className="text-lg text-blue-500 dark:text-blue-400 sm:text-xl">↑</span>
+          <span>
+            <span className="font-semibold text-blue-600 dark:text-blue-400">Best case:</span>{' '}
+            <span className="font-medium text-slate-800 dark:text-slate-100">{bet.best}</span>
+          </span>
+        </p>
+      </div>
+    </motion.div>
+  );
+};
+
+const DealtBets = () => {
+  const ref = useRef(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start start', 'end start'],
+  });
+
+  /* h-[180vh] unpins at (1.8 - 1) / 1.8 = 0.44; the second card lands by 0.41. */
+  return (
+    <div ref={ref} className="relative h-[180vh]">
+      <div className="sticky top-0 flex h-screen items-center justify-center px-6">
+        <div className="mx-auto w-full max-w-2xl space-y-5 sm:space-y-6">
+          {BETS.map((bet, i) => (
+            <DealtBet key={bet.action} bet={bet} i={i} progress={scrollYProgress} reduce={reduce} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Asymmetry — a payoff curve, drawn by scrolling ──────────────
+   This beat used to be two boxes with a word in each, which meant the page
+   described the shape of an asymmetric bet entirely in prose. That shape has
+   a picture, and it is the picture Ethan's finance audience already reads.
+
+   The floor is capped and short, so it draws almost instantly. The upside is
+   unbounded, so it keeps climbing and runs off the top of the frame. The two
+   halves are literally given different amounts of scroll, which is the whole
+   argument in one gesture.
+   ────────────────────────────────────────────────────────────── */
+const AsymmetrySection = () => {
+  const ref = useRef(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start start', 'end start'],
+  });
+
+  /* h-[190vh] unpins at (1.9 - 1) / 1.9 = 0.47. Everything lands by 0.44. */
+  const introOpacity = useTransform(scrollYProgress, [0, 0.08], [0, 1]);
+  const chartOpacity = useTransform(scrollYProgress, [0.06, 0.14], [0, 1]);
+  const axisOpacity = useTransform(scrollYProgress, [0.1, 0.16], [0, 1]);
+
+  /* Capped loss: a short flat run, over in a moment. */
+  const floorDraw = useTransform(scrollYProgress, [0.16, 0.22], [0, 1]);
+  const floorLabel = useTransform(scrollYProgress, [0.2, 0.26], [0, 1]);
+
+  /* Uncapped gain: takes four times the scroll and leaves the frame. */
+  const riseDraw = useTransform(scrollYProgress, [0.24, 0.44], [0, 1]);
+  const fillOpacity = useTransform(scrollYProgress, [0.3, 0.44], [0, 1]);
+  const riseLabel = useTransform(scrollYProgress, [0.38, 0.44], [0, 1]);
+
+  const still = reduce ? 1 : undefined;
+
+  return (
+    <div ref={ref} className="relative h-[190vh]">
+      <div className="sticky top-0 flex h-screen items-center justify-center px-6">
+        <div className="mx-auto w-full max-w-3xl">
+          <motion.div style={{ opacity: reduce ? 1 : introOpacity }}>
+            <p className="text-sm uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500 sm:text-base">
+              asymmetry matters
+            </p>
+            <p className="mt-3 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300 sm:text-xl">
+              It&apos;s about placing
+              <span className="mx-2 inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-200 sm:text-base">
+                small bets
+              </span>
+              where the
+            </p>
+          </motion.div>
+
+          <motion.div style={{ opacity: still ?? chartOpacity }} className="mt-8">
+            <svg
+              viewBox="0 0 460 300"
+              className="w-full overflow-visible"
+              role="img"
+              aria-label="A payoff curve. The loss is capped at a shallow floor; the gain rises without limit and leaves the top of the frame."
+            >
+              <defs>
+                <linearGradient id="upsideFill" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stopColor="rgb(37,99,235)" stopOpacity="0.02" />
+                  <stop offset="100%" stopColor="rgb(37,99,235)" stopOpacity="0.22" />
+                </linearGradient>
+                <linearGradient id="riseStroke" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0%" stopColor="rgb(96,165,250)" />
+                  <stop offset="100%" stopColor="rgb(37,99,235)" />
+                </linearGradient>
+              </defs>
+
+              {/* Break-even line */}
+              <motion.line
+                x1="18" y1="196" x2="452" y2="196"
+                strokeWidth="1"
+                strokeDasharray="3 5"
+                className="stroke-slate-300 dark:stroke-slate-600"
+                style={{ opacity: still ?? axisOpacity }}
+              />
+              <motion.text
+                x="452" y="188" textAnchor="end"
+                className="fill-slate-400 dark:fill-slate-500"
+                style={{ opacity: still ?? axisOpacity, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase' }}
+              >
+                break even
+              </motion.text>
+
+              {/* Area under the upside */}
+              <motion.path
+                d="M 186 238 C 258 232, 338 140, 438 2 L 438 238 Z"
+                fill="url(#upsideFill)"
+                style={{ opacity: still ?? fillOpacity }}
+              />
+
+              {/* Capped floor */}
+              <motion.path
+                d="M 22 238 L 186 238"
+                fill="none"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                className="stroke-slate-400 dark:stroke-slate-500"
+                style={{ pathLength: still ?? floorDraw }}
+              />
+
+              {/* The cap itself */}
+              <motion.path
+                d="M 22 226 L 22 250"
+                fill="none"
+                strokeWidth="2"
+                strokeLinecap="round"
+                className="stroke-slate-400 dark:stroke-slate-500"
+                style={{ opacity: still ?? floorLabel }}
+              />
+
+              {/* Uncapped rise, running off the top edge */}
+              <motion.path
+                d="M 186 238 C 258 232, 338 140, 438 2"
+                fill="none"
+                stroke="url(#riseStroke)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                style={{ pathLength: still ?? riseDraw }}
+              />
+
+              {/* Labels */}
+              <motion.g style={{ opacity: still ?? floorLabel }}>
+                <text
+                  x="30" y="272"
+                  className="fill-slate-400 dark:fill-slate-500"
+                  style={{ fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase' }}
+                >
+                  downside
+                </text>
+                <text
+                  x="30" y="292"
+                  className="fill-slate-600 dark:fill-slate-300"
+                  style={{ fontSize: '19px', fontWeight: 600 }}
+                >
+                  negligible
+                </text>
+              </motion.g>
+
+              {/* Upper left, mirroring the downside labels at lower left, so the
+                  two sit on the axis they describe. Anywhere nearer the curve
+                  and the stroke runs straight through the word. */}
+              <motion.g style={{ opacity: still ?? riseLabel }}>
+                <text
+                  x="26" y="74"
+                  className="fill-blue-500 dark:fill-blue-300"
+                  style={{ fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase' }}
+                >
+                  upside
+                </text>
+                <text
+                  x="24" y="116"
+                  className="fill-blue-700 dark:fill-blue-300"
+                  style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.02em' }}
+                >
+                  enormous
+                </text>
+              </motion.g>
+            </svg>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── "everywhere" — the word does what the sentence claims ───────
+   This beat used to be a single centred line fading in on an otherwise
+   empty screen, which is the least the page does with a whole viewport.
+
+   The sentence says these opportunities are everywhere, so the word
+   multiplies: copies push outward from the centre as you scroll, at
+   varying depth, until the screen is full of them. The claim is made by
+   the layout rather than asserted by the copy.
+   ────────────────────────────────────────────────────────────── */
+
+/* Deterministic hash so the scatter is identical on every render and every
+   reload. Math.random here would reshuffle on each paint. */
+const scatter = (i, salt) => {
+  const x = Math.sin(i * 127.1 + salt * 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+const EverywhereCopy = ({ i, progress, reduce }) => {
+  const angle = scatter(i, 1) * Math.PI * 2;
+  const dist = 26 + scatter(i, 2) * 34; // vw/vh from centre
+  const rot = (scatter(i, 3) - 0.5) * 34;
+  const scale = 0.4 + scatter(i, 4) * 0.55;
+  const peak = 0.1 + scatter(i, 5) * 0.32;
+
+  /* Each copy launches on its own beat, so they arrive as a spray rather
+     than all at once. */
+  const start = 0.16 + (i / 16) * 0.24;
+  const end = start + 0.16;
+
+  const x = useTransform(progress, [start, end], [0, Math.cos(angle) * dist]);
+  const y = useTransform(progress, [start, end], [0, Math.sin(angle) * dist]);
+  const opacity = useTransform(progress, [start, start + 0.06, end + 0.05], [0, peak, peak]);
+  const s = useTransform(progress, [start, end], [0.25, scale]);
+
+  const xv = useTransform(x, (v) => `${v}vw`);
+  const yv = useTransform(y, (v) => `${v}vh`);
+
+  if (reduce) return null;
+
+  return (
+    <motion.span
+      aria-hidden="true"
+      style={{ x: xv, y: yv, opacity, scale: s, rotate: rot }}
+      className="pointer-events-none absolute select-none whitespace-nowrap font-playfair italic text-2xl text-slate-500 dark:text-slate-400 sm:text-3xl md:text-4xl"
+    >
+      everywhere
+    </motion.span>
+  );
+};
+
+const EverywhereSection = () => {
+  const ref = useRef(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start start', 'end start'],
+  });
+
+  /* h-[190vh] unpins at (1.9 - 1) / 1.9 = 0.47, so the spray lands before then. */
+  const lineOpacity = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+  const lineScale = useTransform(scrollYProgress, [0.16, 0.45], [1, 0.9]);
+
+  const copies = useMemo(() => Array.from({ length: 16 }, (_, i) => i), []);
+
+  return (
+    <div ref={ref} className="relative h-[190vh]">
+      <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6">
+        <div className="relative flex items-center justify-center">
+          {copies.map((i) => (
+            <EverywhereCopy key={i} i={i} progress={scrollYProgress} reduce={reduce} />
+          ))}
+
+          <motion.p
+            style={{ opacity: lineOpacity, scale: lineScale }}
+            className="relative z-10 max-w-2xl text-center text-xl leading-relaxed text-slate-700 dark:text-slate-200 sm:text-2xl md:text-3xl"
+          >
+            The strange thing is that these opportunities are{' '}
+            <span className="font-playfair italic text-slate-900 dark:text-slate-50">
+              everywhere
+            </span>
+            .
+          </motion.p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── The ratio — scroll drives the fraction it is describing ─────
+   This section argues that every action should "maximize the ratio of
+   results / effort", and the fraction underneath it used to be static text
+   inside a plain fade-in, followed by a hard-coded 26rem spacer of dead air.
+   The page asked for a lot of scroll here and did nothing with it.
+
+   Now the scroll performs the sentence: results grows, effort shrinks and
+   dims, and the dividing rule stretches with the numerator. By the time you
+   reach the bottom of the pin, the ratio has visibly been maximised.
+   ────────────────────────────────────────────────────────────── */
+const RatioSection = () => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start start', 'end start'],
+  });
+
+  const spring = { stiffness: 90, damping: 26 };
+
+  /* h-[210vh] means the sticky child unpins at (2.1 - 1) / 2.1 = 0.52, so every
+     beat lands before then. Anything scheduled past that plays while the text
+     is already sliding off screen. */
+  const introOpacity = useTransform(scrollYProgress, [0, 0.06], [0, 1]);
+  const maximizeOpacity = useTransform(scrollYProgress, [0.05, 0.14], [0, 1]);
+  const fractionOpacity = useTransform(scrollYProgress, [0.12, 0.2], [0, 1]);
+
+  /* The numerator climbs, the denominator collapses. */
+  const resultsScale = useSpring(
+    useTransform(scrollYProgress, [0.22, 0.5], [1, 1.75]),
+    spring
+  );
+  const effortScale = useSpring(
+    useTransform(scrollYProgress, [0.22, 0.5], [1, 0.55]),
+    spring
+  );
+  const effortOpacity = useTransform(scrollYProgress, [0.22, 0.5], [1, 0.4]);
+  const ruleWidth = useSpring(
+    useTransform(scrollYProgress, [0.22, 0.5], [140, 260]),
+    spring
+  );
+  const ruleWidthPx = useTransform(ruleWidth, (v) => `${v}px`);
+
+  return (
+    <div ref={ref} className="relative h-[210vh]">
+      <div className="sticky top-0 flex h-screen items-center justify-center px-6">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-10 text-center sm:gap-14">
+          <motion.p
+            style={{ opacity: introOpacity }}
+            className="text-lg leading-relaxed text-slate-600 dark:text-slate-300 sm:text-xl md:text-2xl"
+          >
+            Every{' '}
+            <motion.span
+              animate={{ rotate: [0, -5, 4, -3, 0], y: [0, -4, 2, -2, 0], scale: [1, 1.08, 1.03, 1] }}
+              transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 1.1, ease: 'easeInOut' }}
+              className="inline-block font-semibold text-slate-800 dark:text-slate-100"
+            >
+              action
+            </motion.span>{' '}
+            should
+          </motion.p>
+
+          <motion.p
+            style={{ opacity: maximizeOpacity }}
+            className="text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-5xl md:text-6xl"
+          >
+            maximize
+          </motion.p>
+
+          <motion.div
+            style={{ opacity: fractionOpacity }}
+            className="flex flex-col items-center gap-6 sm:gap-8"
+          >
+            <p className="text-sm uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500 sm:text-base">
+              the ratio of
+            </p>
+
+            <div className="inline-flex flex-col items-center leading-none">
+              <motion.span
+                style={{ scale: resultsScale }}
+                className="block origin-bottom text-2xl font-semibold text-slate-800 dark:text-slate-100 sm:text-3xl md:text-4xl"
+              >
+                results
+              </motion.span>
+
+              <motion.span
+                style={{ width: ruleWidthPx }}
+                className="my-3 block h-px bg-slate-300 dark:bg-slate-600"
+              />
+
+              <motion.span
+                style={{ scale: effortScale, opacity: effortOpacity }}
+                className="block origin-top text-2xl font-semibold text-slate-500 dark:text-slate-400 sm:text-3xl md:text-4xl"
+              >
+                effort
+              </motion.span>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ─── Fade-in wrapper — scroll-progress driven ─── */
 const FadeInBlock = ({ children, className = '' }) => {
   const ref = useRef(null);
@@ -748,8 +1232,10 @@ const HobbiesSection = () => {
   const isInView = useInView(ref, { once: true, margin: '-5% 0px -5% 0px' });
   const [activeHobby, setActiveHobby] = useState(null);
 
+  /* The jiu jitsu card rendered as an empty white box until the 6.9MB mp4
+     finished downloading. A poster frame gives it something to show. */
   const hobbies = [
-    { type: 'video', src: '/images/jiujitsu.mp4', label: 'jiu jitsu' },
+    { type: 'video', src: '/images/jiujitsu.mp4', poster: '/images/jiujitsu-poster.jpg', label: 'jiu jitsu' },
     { type: 'img', src: '/images/badminton.jpg', label: 'badminton' },
     { type: 'img', src: '/images/hockey.jpg', label: 'hockey' },
     { type: 'img', src: '/images/investing.jpg', label: 'investing' },
@@ -779,7 +1265,7 @@ const HobbiesSection = () => {
               >
                 <div className="aspect-square relative overflow-hidden">
                   {hobby.type === 'video' ? (
-                    <video src={hobby.src} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" autoPlay loop muted playsInline />
+                    <video src={hobby.src} poster={hobby.poster} preload="metadata" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" autoPlay loop muted playsInline />
                   ) : (
                     <img src={hobby.src} alt={hobby.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   )}
@@ -814,7 +1300,7 @@ const HobbiesSection = () => {
             >
               <div className="aspect-square sm:aspect-[4/3] relative overflow-hidden">
                 {activeHobby.type === 'video' ? (
-                  <video src={activeHobby.src} className="w-full h-full object-cover" autoPlay loop muted playsInline />
+                  <video src={activeHobby.src} poster={activeHobby.poster} className="w-full h-full object-cover" autoPlay loop muted playsInline />
                 ) : (
                   <img src={activeHobby.src} alt={activeHobby.label} className="w-full h-full object-cover" />
                 )}
@@ -852,7 +1338,7 @@ const QuickFacts = () => {
               <span>I speak 2.5 languages (english, chinese, and learning french)</span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="text-teal-500 dark:text-teal-400 text-xl">→</span>
+              <span className="text-blue-500 dark:text-blue-400 text-xl">→</span>
               <span>my favourite dish is eggs and tomatoes</span>
             </li>
             <li className="flex items-start gap-3">
@@ -866,219 +1352,6 @@ const QuickFacts = () => {
           </ul>
         </div>
       </motion.div>
-    </div>
-  );
-};
-
-/* ─── Custom cursor component ─── */
-const CustomCursor = () => {
-  const cursorRef = useRef(null);
-  const ringRef = useRef(null);
-  const pos = useRef({ x: -100, y: -100 });
-  const ringPos = useRef({ x: -100, y: -100 });
-  const hovering = useRef(false);
-  const visible = useRef(true);
-
-  useEffect(() => {
-    const onMove = (e) => {
-      pos.current = { x: e.clientX, y: e.clientY };
-      visible.current = true;
-    };
-    const onLeave = () => { visible.current = false; };
-    const onEnter = () => { visible.current = true; };
-
-    const checkHover = () => {
-      const el = document.elementFromPoint(pos.current.x, pos.current.y);
-      hovering.current = el && (el.closest('a') || el.closest('button') || el.closest('[data-hover]'));
-    };
-
-    let raf;
-    const animate = () => {
-      if (cursorRef.current && ringRef.current) {
-        cursorRef.current.style.left = `${pos.current.x}px`;
-        cursorRef.current.style.top = `${pos.current.y}px`;
-        cursorRef.current.style.opacity = visible.current ? 1 : 0;
-
-        ringPos.current.x += (pos.current.x - ringPos.current.x) * 0.15;
-        ringPos.current.y += (pos.current.y - ringPos.current.y) * 0.15;
-        ringRef.current.style.left = `${ringPos.current.x}px`;
-        ringRef.current.style.top = `${ringPos.current.y}px`;
-        ringRef.current.style.opacity = visible.current ? 1 : 0;
-
-        checkHover();
-        cursorRef.current.className = `custom-cursor${hovering.current ? ' hovering' : ''}`;
-        ringRef.current.className = `cursor-ring${hovering.current ? ' hovering' : ''}`;
-      }
-      raf = requestAnimationFrame(animate);
-    };
-
-    window.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseleave', onLeave);
-    document.addEventListener('mouseenter', onEnter);
-    raf = requestAnimationFrame(animate);
-
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseleave', onLeave);
-      document.removeEventListener('mouseenter', onEnter);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
-
-  return (
-    <>
-      <div ref={cursorRef} className="custom-cursor" />
-      <div ref={ringRef} className="cursor-ring" />
-    </>
-  );
-};
-
-/* ─── Magnetic button component ─── */
-const MagneticButton = ({ children, className = '', ...props }) => {
-  const btnRef = useRef(null);
-
-  const handleMouseMove = (e) => {
-    const btn = btnRef.current;
-    if (!btn) return;
-    const rect = btn.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    btn.style.transform = `translate(${x * 0.25}px, ${y * 0.25}px)`;
-  };
-
-  const handleMouseLeave = () => {
-    if (btnRef.current) btnRef.current.style.transform = 'translate(0, 0)';
-  };
-
-  return (
-    <div
-      ref={btnRef}
-      className="magnetic-btn inline-block"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      {React.cloneElement(children, { className: `${children.props.className || ''} ${className}` , ...props })}
-    </div>
-  );
-};
-
-/* ─── Proximity text — letters react to cursor ─── */
-const ProximityText = ({ text, className = '' }) => {
-  const containerRef = useRef(null);
-  const lettersRef = useRef([]);
-  const mouse = useRef({ x: -1000, y: -1000 });
-  const rafId = useRef(null);
-
-  useEffect(() => {
-    const onMove = (e) => {
-      mouse.current = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener('mousemove', onMove);
-
-    const animate = () => {
-      lettersRef.current.forEach((el) => {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = mouse.current.x - cx;
-        const dy = mouse.current.y - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const maxDist = 120;
-
-        if (dist < maxDist) {
-          const strength = 1 - dist / maxDist;
-          const scale = 1 + strength * 0.2;
-          const moveX = (dx / dist) * strength * 4;
-          const moveY = (dy / dist) * strength * 4;
-          el.style.transform = `translate(${moveX}px, ${moveY}px) scale(${scale})`;
-        } else {
-          el.style.transform = 'translate(0, 0) scale(1)';
-        }
-      });
-      rafId.current = requestAnimationFrame(animate);
-    };
-
-    rafId.current = requestAnimationFrame(animate);
-
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      cancelAnimationFrame(rafId.current);
-    };
-  }, []);
-
-  const letters = text.split('');
-
-  return (
-    <span ref={containerRef} className={className}>
-      {letters.map((char, i) => (
-        <span
-          key={i}
-          ref={(el) => (lettersRef.current[i] = el)}
-          className="proximity-letter"
-        >
-          {char === ' ' ? '\u00A0' : char}
-        </span>
-      ))}
-    </span>
-  );
-};
-
-/* ─── Stagger wrapper — auto-staggers children on mount ─── */
-const StaggerContainer = ({ children, baseDelay = 0, stagger = 0.12 }) => {
-  return (
-    <>
-      {React.Children.map(children, (child, i) => {
-        if (!React.isValidElement(child)) return child;
-        return (
-          <div className="stagger-item" style={{ animationDelay: `${baseDelay + i * stagger}s` }}>
-            {child}
-          </div>
-        );
-      })}
-    </>
-  );
-};
-
-/* ─── Flip card photo component ─── */
-const FlipPhoto = () => {
-  const cardRef = useRef(null);
-
-  const handleMouseMove = (e) => {
-    const card = cardRef.current;
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    const inner = card.querySelector('.flip-card-inner');
-    if (inner) {
-      inner.style.transform = `rotateY(180deg) rotateX(${y * -8}deg) rotateY(${x * 8}deg) translateZ(10px)`;
-    }
-  };
-
-  const handleMouseLeave = () => {
-    const card = cardRef.current;
-    if (!card) return;
-    const inner = card.querySelector('.flip-card-inner');
-    if (inner) inner.style.transform = '';
-  };
-
-  return (
-    <div
-      ref={cardRef}
-      className="flip-card w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 float-animation"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      data-hover
-    >
-      <div className="flip-card-inner shadow-xl rounded-full border-4 border-white">
-        <div className="flip-card-front">
-          <img src="/images/seriousheadshot.JPG" alt="Ethan Zhou" className="w-full h-full object-cover" />
-        </div>
-        <div className="flip-card-back">
-          <img src="/images/headshot.jpg" alt="Ethan Zhou casual" className="w-full h-full object-cover" />
-        </div>
-      </div>
     </div>
   );
 };
@@ -1101,547 +1374,244 @@ const AboutAtmosphere = () => {
   );
 };
 
+
 /* ════════════════════════════════════════
-   MAIN PORTFOLIO COMPONENT
+   ABOUT — the scroll narrative
+
+   Left structurally as it was. This is the strongest thing on the site and
+   the pacing was deliberate: the vortex assembling the sentence, the judo
+   quote drawing character by character, the lever tilting to both scroll and
+   cursor, the upside/downside cards sized to encode the asymmetry they
+   describe, and the same lever returning perfectly level as "the most
+   symmetric bet you can make".
+
+   Only two things changed: the timings at the top of ObsessionStatement and
+   ContrastSection, which each had a run-up of roughly one blank screen.
+   ════════════════════════════════════════ */
+const About = () => (
+  <>
+    <AboutAtmosphere />
+    <motion.div
+      className="relative z-[1]"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {/* 1 — Hero quote */}
+      <HeroQuote />
+
+      {/* 2 — "I'm obsessed with this idea." */}
+      <ObsessionStatement />
+
+      {/* 3 — The judo principle */}
+      <JudoQuote />
+
+      {/* 4 — Leverage */}
+      <LeverageSection />
+
+      {/* 5 — results / effort */}
+      <RatioSection />
+
+      {/* Asymmetry: a payoff curve drawn by scrolling. */}
+      <AsymmetrySection />
+
+      {/* 6 — Worked examples, dealt like cards */}
+      <DealtBets />
+
+
+      {/* 7 — The turn */}
+      <EverywhereSection />
+
+      {/* 8 — Why people don't take them, and the level lever */}
+      <ContrastSection />
+
+      {/* 9 — Payoff */}
+      <FinalStatement />
+
+      {/* 10 — Who I am away from the argument */}
+      <div className="px-6">
+        <div className="max-w-2xl mx-auto space-y-8 sm:space-y-12 pb-8">
+          <ScrollSection height="min-h-[20vh]">
+            <div className="flex justify-center">
+              <div className="w-12 h-px bg-slate-300 dark:bg-slate-700" />
+            </div>
+          </ScrollSection>
+
+          <FadeInBlock>
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+              about me
+            </h2>
+          </FadeInBlock>
+
+          <HobbiesSection />
+          <QuickFacts />
+        </div>
+      </div>
+    </motion.div>
+  </>
+);
+
+/* ════════════════════════════════════════
+   SHELL
    ════════════════════════════════════════ */
 const Portfolio = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [mounted, setMounted] = useState(false);
+  const [route, navigate] = useHashRoute();
   const [easterEgg, setEasterEgg] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
 
-  /* Scroll to top on tab change — essential for scroll-driven about page */
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [activeTab]);
-
-  /* Track mouse for gradient background */
-  const handleGlobalMouse = useCallback((e) => {
-    setMousePos({
-      x: e.clientX / window.innerWidth,
-      y: e.clientY / window.innerHeight,
-    });
-  }, []);
+  /* Respect the OS preference on first load, then let the toggle win.
+     matchMedia is guarded: jsdom does not implement it, and an unguarded call
+     here takes the whole app down in tests rather than just losing the
+     preference. */
+  const [darkMode, setDarkMode] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
 
   useEffect(() => {
-    setMounted(true);
-    window.addEventListener('mousemove', handleGlobalMouse);
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
 
-    // Easter egg console messages
-    console.log('%c👋 hi, you found the console!', 'font-size: 20px; font-weight: bold; color: #2563eb;');
-    console.log('%cif you\'re a recruiter reading this let\'s talk → info@ethanzhou.ca', 'font-size: 14px; color: #0d9488;');
+  /* The pointer-following backdrop used to live in useState, so every single
+     mousemove re-rendered the whole page. Motion values keep it off the React
+     render path entirely. */
+  const mx = useMotionValue(0.5);
+  const my = useMotionValue(0.5);
+  const smx = useSpring(mx, { stiffness: 60, damping: 20 });
+  const smy = useSpring(my, { stiffness: 60, damping: 20 });
+  const bgX = useTransform(smx, (v) => `${v * 100}%`);
+  const bgY = useTransform(smy, (v) => `${v * 100}%`);
+  const tint = darkMode ? 'rgba(51, 65, 85, 0.40)' : 'rgba(219, 234, 254, 0.60)';
+  const backdrop = useMotionTemplate`radial-gradient(ellipse 80% 60% at ${bgX} ${bgY}, ${tint}, rgba(0,0,0,0) 100%)`;
 
-    // Type "hire" easter egg
+  const onPointerMove = useCallback(
+    (e) => {
+      mx.set(e.clientX / window.innerWidth);
+      my.set(e.clientY / window.innerHeight);
+    },
+    [mx, my]
+  );
+
+  useEffect(() => {
+    window.addEventListener('mousemove', onPointerMove, { passive: true });
+
+    console.log(
+      '%c👋 hi, you found the console!',
+      'font-size: 20px; font-weight: bold; color: #2563eb;'
+    );
+    console.log(
+      "%cif you're a recruiter reading this let's talk → info@ethanzhou.ca",
+      'font-size: 14px; color: #2563eb;'
+    );
+
     let buffer = '';
-    const handleKeyPress = (e) => {
-      buffer += e.key.toLowerCase();
-      if (buffer.length > 10) buffer = buffer.slice(-10);
+    const onKey = (e) => {
+      buffer = (buffer + e.key.toLowerCase()).slice(-10);
       if (buffer.includes('hire')) {
         setEasterEgg(true);
         buffer = '';
         setTimeout(() => setEasterEgg(false), 5000);
       }
     };
-    window.addEventListener('keydown', handleKeyPress);
+    window.addEventListener('keydown', onKey);
 
     return () => {
-      window.removeEventListener('mousemove', handleGlobalMouse);
-      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('keydown', onKey);
     };
-  }, [handleGlobalMouse]);
-
-  const experience = [
-    {
-      role: 'Marketing & Business Strategy Intern',
-      company: 'United Lifts Technologies',
-      period: 'April 2025 – Present',
-      location: 'Calgary',
-      impact: '+256%',
-      metric: 'LinkedIn Growth',
-      highlights: [
-        'Edited 10+ website pages improving UX and SEO',
-        'Improved search rankings by 38%',
-        'Increased LinkedIn engagement by 256%',
-        'Led marketing strategy initiatives'
-      ]
-    },
-    {
-      role: 'Content Creator',
-      company: '@ethanzhouwealth',
-      period: 'August 2023 – Present',
-      location: 'Instagram & TikTok',
-      impact: '10M+',
-      metric: 'Total Views',
-      highlights: [
-        'Created 150+ educational finance videos',
-        'Generated 10M+ views across platforms',
-        'Built audience of 22,000+ followers',
-        'Focus on investing & personal finance'
-      ]
-    }
-  ];
-
-  /* Interactive gradient — the ONLY gradient on the page */
-  const gradientStyle = {
-    background: `radial-gradient(
-      ellipse 80% 60% at ${mousePos.x * 100}% ${mousePos.y * 100}%,
-      ${darkMode ? 'rgba(51, 65, 85, 0.4)' : 'rgba(219, 234, 254, 0.6)'},
-      ${darkMode ? 'rgba(15, 23, 42, 0)' : 'rgba(248, 250, 252, 0)'}
-    )`,
-    transition: 'background 0.3s ease',
-  };
+  }, [onPointerMove]);
 
   return (
-    <div className={darkMode ? 'dark' : ''}>
-    <div className={`min-h-screen font-inter ${darkMode ? 'bg-slate-950' : 'bg-slate-50'} transition-colors duration-500`}>
-
-      {/* Mouse-following gradient overlay */}
-      <div className="fixed inset-0 pointer-events-none z-0" style={gradientStyle} />
+    <div className="min-h-[100dvh] bg-slate-50 font-sans text-slate-900 transition-colors duration-500 dark:bg-slate-950 dark:text-slate-100">
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{ background: backdrop }}
+        aria-hidden="true"
+      />
 
       <CustomCursor />
 
-      {/* 
-        Hey recruiter 👋 — yes, I hand-coded this portfolio.
-        React + Tailwind CSS. No templates. No page builders.
-        If you're reading this, let's grab coffee → info@ethanzhou.ca
-      */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-slate-900 focus:px-5 focus:py-2.5 focus:text-sm focus:text-white dark:focus:bg-slate-50 dark:focus:text-slate-900"
+      >
+        Skip to content
+      </a>
 
-      {/* Easter egg toast */}
-      {easterEgg && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-white dark:bg-gray-800 px-6 py-3 rounded-full shadow-lg border border-slate-200 dark:border-gray-700 animate-bounce">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">🎉 you typed "hire" i like where this is going! → <span className="text-blue-600 dark:text-blue-400 font-semibold">info@ethanzhou.ca</span></span>
-        </div>
-      )}
+      <AnimatePresence>
+        {easterEgg && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            className="fixed left-1/2 top-20 z-50 -translate-x-1/2 rounded-full border border-slate-200 bg-white px-6 py-3 shadow-card-hover dark:border-slate-700 dark:bg-slate-900"
+          >
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+              🎉 you typed &quot;hire&quot;. i like where this is going →{' '}
+              <span className="font-semibold text-blue-600 dark:text-blue-400">
+                info@ethanzhou.ca
+              </span>
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="relative z-10">
-      <header className="max-w-4xl mx-auto px-6 py-8">
-        <nav className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 mb-12">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className="text-2xl font-bold text-slate-800 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-95 active:scale-90 transition-all duration-200"
-          >
-            ethan zhou
-          </button>
-          <div className="flex flex-wrap justify-center items-center gap-2">
-            {['about', 'projects', 'social media'].map((tab) => {
-              const key = tab === 'social media' ? 'media' : tab;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 text-sm ${
-                    activeTab === key
-                      ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold shadow-sm'
-                      : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-200 active:scale-95'
-                  }`}
-                >
-                  {tab}
-                </button>
-              );
-            })}
+        <Nav
+          route={route}
+          navigate={navigate}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+        />
 
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="ml-1 px-2.5 py-2 rounded-lg transition-all duration-300 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 active:scale-95"
-              title={darkMode ? 'Light mode' : 'Dark mode'}
-            >
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-          </div>
-        </nav>
-
-        {/* ═══ HERO / OVERVIEW — redesigned ═══ */}
-        {activeTab === 'overview' && (
-          <div className={`transition-all duration-700 min-h-0 md:min-h-[calc(100vh-200px)] flex flex-col justify-center items-center ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-
-            {/* Flip Photo */}
-            <div className="mb-8 sm:mb-10 md:mb-14 stagger-item" style={{ animationDelay: '0.1s' }}>
-              <FlipPhoto />
-            </div>
-
-            <div className="text-center mb-8 sm:mb-12 md:mb-16">
-              {/* Main heading — handwritten font, solid color, proximity effect */}
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-caveat font-bold mb-4 md:mb-6 text-slate-800 dark:text-slate-100 stagger-item" style={{ animationDelay: '0.3s' }}>
-                <ProximityText text="hey there, i'm ethan!" />
-              </h1>
-
-              {/* Subtitle — clean, minimal */}
-              <p className="text-base sm:text-lg md:text-xl text-slate-500 dark:text-slate-400 mb-10 md:mb-14 stagger-item" style={{ animationDelay: '0.5s' }}>
-                eng student who makes things on the internet
-              </p>
-
-              {/* CTA Buttons — solid colors, no gradients, magnetic */}
-              <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4 px-4 stagger-item" style={{ animationDelay: '0.7s' }}>
-                <MagneticButton>
-                  <a
-                    href="mailto:info@ethanzhou.ca"
-                    className="flex items-center justify-center gap-2 bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 px-7 py-3.5 rounded-full font-medium shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
-                    data-hover
-                  >
-                    <Mail className="w-4 h-4" />
-                    let's connect!
-                  </a>
-                </MagneticButton>
-                <MagneticButton>
-                  <a
-                    href="https://instagram.com/ethanzhouwealth"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-7 py-3.5 rounded-full font-medium shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 border border-slate-200 dark:border-slate-700"
-                    data-hover
-                  >
-                    <Instagram className="w-4 h-4" />
-                    @ethanzhouwealth
-                  </a>
-                </MagneticButton>
-                <MagneticButton>
-                  <a
-                    href="https://www.linkedin.com/in/ethan-zhou-832565315/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-7 py-3.5 rounded-full font-medium shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 border border-slate-200 dark:border-slate-700"
-                    data-hover
-                  >
-                    <Linkedin className="w-4 h-4" />
-                    linkedin
-                  </a>
-                </MagneticButton>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ═══ ABOUT — Scroll-driven storytelling ═══ */}
-        {activeTab === 'about' && (
-          <>
-          <AboutAtmosphere />
+        <main id="main">
+          {/* No AnimatePresence here on purpose. `mode="wait"` keeps the
+              outgoing page mounted until its exit finishes, which meant a
+              click on "about" left the work page on screen. A keyed fade-in
+              gives the same feel with none of the handover risk, and the new
+              route is in the DOM immediately for anchors and screen readers. */}
           <motion.div
-            className="-mx-6 -mt-4 relative z-[1]"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            key={route}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
           >
-
-            {/* Section 1: Hero Quote — full viewport, fades/scales on scroll */}
-            <HeroQuote />
-
-            {/* Section 2: Obsession Statement */}
-            <ObsessionStatement />
-
-            {/* Section 3: Judo Connection */}
-            <JudoQuote />
-
-            {/* Section 4: Leverage — scroll fade-in */}
-            <LeverageSection />
-
-            {/* Section 5: Philosophy Explanation */}
-            <ScrollSection height="min-h-[120vh] sm:min-h-[140vh] md:min-h-[160vh]">
-              <div className="text-center max-w-3xl mx-auto space-y-12 sm:space-y-16 md:space-y-20 py-16 sm:py-24 md:py-32">
-                <p className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Every{' '}
-                  <motion.span
-                    animate={{ rotate: [0, -5, 4, -3, 0], y: [0, -4, 2, -2, 0], scale: [1, 1.08, 1.03, 1] }}
-                    transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 1.1, ease: 'easeInOut' }}
-                    className="inline-block font-semibold text-slate-800 dark:text-slate-100"
-                  >
-                    action
-                  </motion.span>{' '}
-                  should
-                </p>
-
-                <p className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
-                  maximize
-                </p>
-
-                <div className="flex flex-col items-center gap-8 sm:gap-12 md:gap-16">
-                  <p className="text-sm sm:text-base md:text-lg uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500">
-                    the ratio of
-                  </p>
-                  <div className="inline-flex flex-col items-center leading-none">
-                    <span className="text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-800 dark:text-slate-100">
-                      results
-                    </span>
-                    <span className="my-2 h-px w-28 sm:w-36 md:w-44 bg-slate-300 dark:bg-slate-600" />
-                    <span className="text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-500 dark:text-slate-400">
-                      effort
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-52 sm:pt-72 md:pt-[26rem]">
-                  <div className="mx-auto max-w-3xl px-2 sm:px-4">
-                    <p className="text-sm sm:text-base md:text-lg uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
-                      asymmetry matters
-                    </p>
-                    <p className="mt-3 text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed sm:leading-loose">
-                      It&apos;s about placing
-                      <span className="mx-2 inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-sm sm:text-base text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                        small bets
-                      </span>
-                      where the
-                    </p>
-                    <div className="mt-8 grid gap-4 sm:grid-cols-[2.15fr_0.85fr] sm:gap-5 items-end">
-                      <motion.div
-                        animate={{ y: [0, -4, 0] }}
-                        transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.2, ease: 'easeInOut' }}
-                        className="rounded-2xl border border-blue-200 bg-blue-50 px-5 py-6 sm:px-6 sm:py-7 text-left overflow-hidden dark:border-blue-500/20 dark:bg-blue-500/10"
-                      >
-                        <p className="text-xs uppercase tracking-[0.22em] text-blue-500 dark:text-blue-300">upside</p>
-                        <p className="mt-3 text-[clamp(2.1rem,6.2vw,4rem)] leading-[0.98] font-semibold tracking-tight text-blue-700 dark:text-blue-300">enormous</p>
-                      </motion.div>
-                      <motion.div
-                        animate={{ y: [0, 4, 0] }}
-                        transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.2, ease: 'easeInOut', delay: 0.2 }}
-                        className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-left self-end dark:border-slate-700 dark:bg-slate-800/70"
-                      >
-                        <p className="text-xs uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">downside</p>
-                        <p className="mt-2 text-xl sm:text-2xl md:text-3xl font-semibold text-slate-700 dark:text-slate-200">negligible</p>
-                      </motion.div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ScrollSection>
-
-            {/* Section 6: Example Callout Cards */}
-            <div className="min-h-[70vh] sm:min-h-[80vh] flex items-center justify-center px-6">
-              <div className="w-full max-w-2xl mx-auto space-y-6 sm:space-y-8">
-                <SlideCard from="left" delay={0}>
-                  <div className="rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 p-6 sm:p-8 shadow-lg">
-                    <p className="text-slate-800 dark:text-slate-100 text-lg sm:text-xl font-semibold mb-4 sm:mb-5">
-                      Send an email to someone you admire.
-                    </p>
-                    <div className="space-y-2 sm:space-y-3">
-                      <p className="flex items-start gap-3">
-                        <span className="text-slate-300 dark:text-slate-600 text-lg sm:text-xl">↓</span>
-                        <span><span className="font-semibold text-slate-400 dark:text-slate-500">Worst case:</span>{' '}<span className="text-slate-500 dark:text-slate-400">they ignore it.</span></span>
-                      </p>
-                      <p className="flex items-start gap-3">
-                        <span className="text-blue-500 dark:text-blue-400 text-lg sm:text-xl">↑</span>
-                        <span><span className="font-semibold text-blue-600 dark:text-blue-400">Best case:</span>{' '}<span className="text-slate-800 dark:text-slate-100 font-medium">it changes your career.</span></span>
-                      </p>
-                    </div>
-                  </div>
-                </SlideCard>
-
-                <SlideCard from="right" delay={0.15}>
-                  <div className="rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 p-6 sm:p-8 shadow-lg">
-                    <p className="text-slate-800 dark:text-slate-100 text-lg sm:text-xl font-semibold mb-4 sm:mb-5">
-                      Publish your ideas online.
-                    </p>
-                    <div className="space-y-2 sm:space-y-3">
-                      <p className="flex items-start gap-3">
-                        <span className="text-slate-300 dark:text-slate-600 text-lg sm:text-xl">↓</span>
-                        <span><span className="font-semibold text-slate-400 dark:text-slate-500">Worst case:</span>{' '}<span className="text-slate-500 dark:text-slate-400">no one reads them.</span></span>
-                      </p>
-                      <p className="flex items-start gap-3">
-                        <span className="text-blue-500 dark:text-blue-400 text-lg sm:text-xl">↑</span>
-                        <span><span className="font-semibold text-blue-600 dark:text-blue-400">Best case:</span>{' '}<span className="text-slate-800 dark:text-slate-100 font-medium">the right person does.</span></span>
-                      </p>
-                    </div>
-                  </div>
-                </SlideCard>
-              </div>
-            </div>
-
-            {/* Section 7: The Reality */}
-            <ScrollSection height="min-h-[60vh] sm:min-h-[70vh]">
-              <div className="text-center space-y-6 sm:space-y-8">
-                <p className="text-xl sm:text-2xl md:text-3xl text-slate-700 dark:text-slate-200 leading-relaxed">
-                  The strange thing is that these opportunities are everywhere.
-                </p>
-              </div>
-            </ScrollSection>
-
-            {/* Section 8: The Contrast — animated reveal */}
-            <ContrastSection />
-
-            {/* Section 9: Final Statement — hero moment */}
-            <FinalStatement />
-
-            {/* Section 10: Transition to About Me + Hobbies */}
-            <div className="px-6">
-              <div className="max-w-2xl mx-auto space-y-8 sm:space-y-12 pb-8">
-
-                {/* Divider */}
-                <ScrollSection height="min-h-[20vh]">
-                  <div className="flex justify-center">
-                    <div className="w-12 h-px bg-slate-300 dark:bg-slate-700" />
-                  </div>
-                </ScrollSection>
-
-                {/* About Me heading */}
-                <FadeInBlock>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 dark:text-slate-100">
-                    <span className="text-blue-500 dark:text-blue-400">✦</span> about me
-                  </h1>
-                </FadeInBlock>
-
-                {/* Hobbies */}
-                <HobbiesSection />
-
-                {/* Quick Facts */}
-                <QuickFacts />
-
-              </div>
-            </div>
-
+            {route === 'home' && <Home navigate={navigate} />}
+            {route === 'work' && <Work />}
+            {route === 'content' && <Content />}
+            {route === 'about' && <About />}
           </motion.div>
-          </>
-        )}
+        </main>
 
-        {/* ═══ PROJECTS ═══ */}
-        {activeTab === 'projects' && (
-          <div className="space-y-6">
-            <StaggerContainer stagger={0.15}>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-slate-800 dark:text-slate-100">
-              <span className="text-blue-500 dark:text-blue-400">✦</span> projects
-            </h1>
-
-            <div className="bg-white dark:bg-slate-800/50 rounded-2xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-800 hover:shadow-lg transition-shadow duration-300 max-w-2xl mx-auto">
-              <a href="https://explain-my-code-w3sj.onrender.com/" target="_blank" rel="noopener noreferrer" className="block" data-hover>
-                <div className="aspect-video bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <video src="/images/explain-my-code.mp4" className="w-full h-full object-cover" autoPlay loop muted playsInline />
-                </div>
-              </a>
-              <div className="p-4 sm:p-6">
-                <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Explain my Code</h3>
-                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mb-4">
-                  can explain a code to a 5 year old
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs rounded-full font-medium">AI</span>
-                  <span className="px-3 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 text-xs rounded-full font-medium">Education</span>
-                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs rounded-full font-medium">Web App</span>
-                </div>
-                <a href="https://explain-my-code-w3sj.onrender.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold transition-colors" data-hover>
-                  visit project
-                  <ArrowRight className="w-4 h-4" />
+        <footer className="mx-auto max-w-5xl px-6 pb-12 pt-8">
+          <div className="flex flex-col items-center gap-5 border-t border-slate-200 pt-10 dark:border-slate-800 sm:flex-row sm:justify-between">
+            <div className="text-sm text-slate-400 dark:text-slate-600">
+              © {new Date().getFullYear()} ethan zhou
+            </div>
+            <div className="flex gap-5">
+              {[
+                { href: 'mailto:info@ethanzhou.ca', Icon: Mail, label: 'Email' },
+                { href: 'https://instagram.com/ethanzhouwealth', Icon: Instagram, label: 'Instagram' },
+                { href: 'https://www.youtube.com/@Ethanzhouwealth', Icon: Youtube, label: 'YouTube' },
+                { href: 'https://www.linkedin.com/in/ethan-zhou-832565315/', Icon: Linkedin, label: 'LinkedIn' },
+              ].map(({ href, Icon, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target={href.startsWith('http') ? '_blank' : undefined}
+                  rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  aria-label={label}
+                  data-hover
+                  className="text-slate-400 transition-colors hover:text-slate-900 dark:text-slate-600 dark:hover:text-slate-200"
+                >
+                  <Icon className="h-5 w-5" />
                 </a>
-              </div>
+              ))}
             </div>
-            </StaggerContainer>
           </div>
-        )}
-
-        {/* ═══ EXPERIENCE (hidden tab) ═══ */}
-        {activeTab === 'experience' && (
-          <div className="space-y-6">
-            <div className="stagger-item" style={{ animationDelay: '0s' }}>
-              <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-slate-800 dark:text-slate-100">
-                <span className="text-blue-500 dark:text-blue-400">✦</span> my experience
-              </h1>
-            </div>
-            {experience.map((exp, index) => (
-              <div key={index} className="stagger-item bg-white dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md hover:shadow-lg transition-shadow duration-300 border border-slate-100 dark:border-slate-800" style={{ animationDelay: `${0.1 + index * 0.15}s` }}>
-                <div className="flex flex-col gap-3 mb-4">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">{exp.role}</h3>
-                    <div className="text-base sm:text-lg text-blue-600 dark:text-blue-400 font-semibold">{exp.company}</div>
-                    <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">{exp.location} • {exp.period}</div>
-                  </div>
-                  <div className="bg-teal-50 dark:bg-teal-900/20 px-4 py-2 rounded-xl border-2 border-teal-200 dark:border-teal-800 w-fit">
-                    <div className="text-xl sm:text-2xl font-bold text-teal-600 dark:text-teal-400">{exp.impact}</div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">{exp.metric}</div>
-                  </div>
-                </div>
-                <ul className="space-y-2">
-                  {exp.highlights.map((highlight, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-slate-700 dark:text-slate-300 text-sm sm:text-base">
-                      <ArrowRight className="w-4 h-4 text-blue-500 dark:text-blue-400 mt-1 flex-shrink-0" />
-                      <span>{highlight}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ═══ SOCIAL MEDIA ═══ */}
-        {activeTab === 'media' && (
-          <div>
-            <StaggerContainer stagger={0.13}>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-slate-800 dark:text-slate-100">
-              <span className="text-teal-500 dark:text-teal-400">✦</span> social media
-            </h1>
-
-            <div className="bg-white dark:bg-slate-800/50 rounded-2xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-800 mb-6 sm:mb-8 hover:shadow-lg transition-shadow duration-300">
-              <div className="aspect-video overflow-hidden">
-                <img src="/images/featured.png" alt="Featured Content" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-6 sm:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">@ethanzhouwealth</h3>
-                <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 mb-4">
-                  creating educational content about investing and personal finance.
-                </p>
-                <div className="flex flex-wrap gap-3 mb-6">
-                  <div className="flex items-center gap-2 bg-teal-50 dark:bg-teal-900/20 px-3 sm:px-4 py-2 rounded-full border-2 border-teal-200 dark:border-teal-800">
-                    <Eye className="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0" />
-                    <span className="text-teal-600 dark:text-teal-400 font-semibold text-xs sm:text-sm">10M+ total views</span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-3 sm:px-4 py-2 rounded-full border-2 border-blue-200 dark:border-blue-800">
-                    <Users className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                    <span className="text-blue-600 dark:text-blue-400 font-semibold text-xs sm:text-sm">22K+ across tiktok/insta/yt</span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/30 px-3 sm:px-4 py-2 rounded-full border-2 border-slate-200 dark:border-slate-700">
-                    <BarChart3 className="w-4 h-4 text-slate-600 dark:text-slate-400 flex-shrink-0" />
-                    <span className="text-slate-600 dark:text-slate-400 font-semibold text-xs sm:text-sm">150+ videos</span>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <a href="https://instagram.com/ethanzhouwealth" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 px-6 py-3 rounded-full font-medium shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300" data-hover>
-                    <Instagram className="w-4 h-4" />
-                    follow on instagram
-                  </a>
-                  <a href="https://www.youtube.com/@Ethanzhouwealth" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-full font-medium shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300" data-hover>
-                    <Youtube className="w-4 h-4" />
-                    subscribe on youtube
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Brands */}
-            <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-100 dark:border-slate-800">
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 flex items-center gap-2">
-                <span className="text-teal-500 dark:text-teal-400">✦</span> brands i've worked with
-              </h2>
-              <div className="flex justify-center items-center gap-6 flex-wrap">
-                <a href="https://turbo.ai" target="_blank" rel="noopener noreferrer" className="rounded-2xl overflow-hidden w-32 h-32 hover:scale-105 transition-all duration-300 hover:shadow-lg" data-hover>
-                  <img src="/images/turbo-logo.png" alt="Turbo" className="w-full h-full object-cover" />
-                </a>
-              </div>
-              <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-                interested in partnering? <a href="mailto:info@ethanzhou.ca" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold" data-hover>let's chat!</a>
-              </div>
-            </div>
-            </StaggerContainer>
-          </div>
-        )}
-
-        {/* ═══ FOOTER ═══ */}
-        <footer className="mt-8 md:mt-6 text-center">
-          <div className="flex justify-center gap-4 mb-4">
-            <a href="mailto:info@ethanzhou.ca" className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors" data-hover>
-              <Mail className="w-5 h-5" />
-            </a>
-            <a href="https://instagram.com/ethanzhouwealth" target="_blank" rel="noopener noreferrer" className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors" data-hover>
-              <Instagram className="w-5 h-5" />
-            </a>
-            <a href="https://www.youtube.com/@Ethanzhouwealth" target="_blank" rel="noopener noreferrer" className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors" data-hover>
-              <Youtube className="w-5 h-5" />
-            </a>
-            <a href="https://www.linkedin.com/in/ethan-zhou-832565315/" target="_blank" rel="noopener noreferrer" className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors" data-hover>
-              <Linkedin className="w-5 h-5" />
-            </a>
-          </div>
-          <div className="text-sm text-slate-400 dark:text-slate-600">© 2026 ethan zhou</div>
         </footer>
-      </header>
       </div>
-    </div>
     </div>
   );
 };
