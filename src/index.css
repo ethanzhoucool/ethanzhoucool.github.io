@@ -2,21 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Base ── */
-* {
-  cursor: none;
-}
+/* ═══════════════════════════════════════════════════════════════
+   Base
+   ═══════════════════════════════════════════════════════════════ */
 
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* ── Obsession shimmer ── */
+/* Keyboard focus stays visible everywhere. */
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+:is(.dark) :focus-visible {
+  outline-color: #60a5fa;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Reduced motion
+   Everything below MOTION_INTENSITY collapses to static. The scroll
+   narrative degrades to plain readable text rather than blank screens.
+   ═══════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .float-animation,
+  .stagger-item {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .film-grain::before {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Obsession shimmer  (narrative: "I'm obsessed with this idea.")
+   ═══════════════════════════════════════════════════════════════ */
 .obsession-shimmer {
   background: linear-gradient(
     90deg,
@@ -47,26 +88,60 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-/* ── Custom cursor ── */
+/* ═══════════════════════════════════════════════════════════════
+   Custom cursor
+
+   OPT-IN, NOT OPT-OUT. `cursor: none` used to be on `*` globally, so a
+   touch device, a reduced-motion user, or any failure to mount the JS
+   cursor left the visitor with no pointer at all.
+
+   Now React adds `.cursor-custom` to <html> only when the device has a
+   fine pointer AND reduced-motion is off. Native cursor is the default
+   and the fallback.
+   ═══════════════════════════════════════════════════════════════ */
+html.cursor-custom,
+html.cursor-custom * {
+  cursor: none;
+}
+
+/* Never hide the pointer where it can't be replaced. */
+@media (pointer: coarse), (hover: none), (prefers-reduced-motion: reduce) {
+  html.cursor-custom,
+  html.cursor-custom * {
+    cursor: auto;
+  }
+  html.cursor-custom a,
+  html.cursor-custom button,
+  html.cursor-custom [role='button'] {
+    cursor: pointer;
+  }
+  .custom-cursor,
+  .cursor-ring {
+    display: none !important;
+  }
+}
+
 .custom-cursor {
   position: fixed;
   top: 0;
   left: 0;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
   background: #1e293b;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
-  transition: width 0.2s ease, height 0.2s ease, background 0.2s ease, opacity 0.2s ease;
-  transform: translate(-50%, -50%);
   mix-blend-mode: difference;
+  transition: width 0.2s ease, height 0.2s ease, margin 0.2s ease,
+    background 0.2s ease, opacity 0.2s ease;
 }
 
 .custom-cursor.hovering {
-  width: 48px;
-  height: 48px;
-  background: rgba(59, 130, 246, 0.5);
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  background: rgba(37, 99, 235, 0.45);
   mix-blend-mode: normal;
 }
 
@@ -74,37 +149,31 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 40px;
-  height: 40px;
-  border: 1.5px solid rgba(30, 41, 59, 0.3);
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border: 1.5px solid rgba(30, 41, 59, 0.28);
   border-radius: 50%;
   pointer-events: none;
   z-index: 9998;
-  transition: width 0.35s ease, height 0.35s ease, border-color 0.35s ease, opacity 0.2s ease;
-  transform: translate(-50%, -50%);
+  transition: width 0.35s ease, height 0.35s ease, margin 0.35s ease,
+    border-color 0.35s ease, opacity 0.2s ease;
+}
+
+:is(.dark) .cursor-ring {
+  border-color: rgba(226, 232, 240, 0.28);
 }
 
 .cursor-ring.hovering {
-  width: 64px;
-  height: 64px;
-  border-color: rgba(59, 130, 246, 0.25);
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
+  border-color: rgba(37, 99, 235, 0.25);
 }
 
-/* Hide custom cursor on touch devices */
-@media (hover: none) and (pointer: coarse) {
-  .custom-cursor,
-  .cursor-ring {
-    display: none !important;
-  }
-  * {
-    cursor: auto;
-  }
-  a, button {
-    cursor: pointer;
-  }
-}
-
-/* ── Flip card ── */
+/* ═══════════════════════════════════════════════════════════════
+   Flip card  (hero portrait)
+   ═══════════════════════════════════════════════════════════════ */
 .flip-card {
   perspective: 1000px;
 }
@@ -117,7 +186,8 @@ body {
   transform-style: preserve-3d;
 }
 
-.flip-card:hover .flip-card-inner {
+.flip-card:hover .flip-card-inner,
+.flip-card:focus-within .flip-card-inner {
   transform: rotateY(180deg);
 }
 
@@ -135,9 +205,12 @@ body {
   transform: rotateY(180deg);
 }
 
-/* ── Float animation ── */
+/* ═══════════════════════════════════════════════════════════════
+   Motion utilities
+   ═══════════════════════════════════════════════════════════════ */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -149,7 +222,6 @@ body {
   animation: float 4s ease-in-out infinite;
 }
 
-/* ── Stagger fade in ── */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -166,20 +238,21 @@ body {
   animation: fadeInUp 0.6s ease forwards;
 }
 
-/* ── Letter proximity effect ── */
 .proximity-letter {
   display: inline-block;
   transition: transform 0.15s ease-out;
   will-change: transform;
 }
 
-/* ── Magnetic button ── */
 .magnetic-btn {
-  transition: transform 0.2s ease-out, box-shadow 0.3s ease, background-color 0.3s ease;
+  transition: transform 0.2s ease-out, box-shadow 0.3s ease,
+    background-color 0.3s ease;
   will-change: transform;
 }
 
-/* ── Film grain overlay for cinematic sections ── */
+/* ═══════════════════════════════════════════════════════════════
+   Film grain — fixed overlay only, never on a scrolling container
+   ═══════════════════════════════════════════════════════════════ */
 .film-grain {
   position: relative;
 }
