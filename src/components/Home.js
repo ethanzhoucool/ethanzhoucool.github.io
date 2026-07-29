@@ -1,10 +1,54 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, Mail, Github } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Mail, Check, Github } from 'lucide-react';
 import { FlipPhoto, MagneticButton, ProximityText } from './ui';
 import { GITHUB_URL } from '../data/work';
 
 const EASE = [0.16, 1, 0.3, 1];
+const EMAIL = 'info@ethanzhou.ca';
+
+/*
+ * The primary CTA was a bare mailto. That silently does nothing for anyone
+ * without a default mail client registered, which is most people reading
+ * webmail in a browser tab: the button looked broken.
+ *
+ * It is still a real anchor, so a configured client opens as before and
+ * right-click copy-link-address still works. On top of that the click copies
+ * the address and says so, so the button always does something visible.
+ */
+function EmailButton() {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef(null);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const onClick = useCallback(() => {
+    // No preventDefault: the mailto still fires for anyone who can use it.
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(EMAIL).then(
+        () => {
+          setCopied(true);
+          clearTimeout(timer.current);
+          timer.current = setTimeout(() => setCopied(false), 2200);
+        },
+        () => {}
+      );
+    }
+  }, []);
+
+  return (
+    <a
+      href={`mailto:${EMAIL}`}
+      onClick={onClick}
+      data-hover
+      aria-label={`Email ${EMAIL}`}
+      className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-card transition-all duration-300 hover:shadow-card-hover active:translate-y-px dark:bg-slate-50 dark:text-slate-900"
+    >
+      {copied ? <Check className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
+      {copied ? 'copied to clipboard' : EMAIL}
+    </a>
+  );
+}
 
 /*
  * Hero.
@@ -58,14 +102,7 @@ export default function Home({ navigate }) {
 
             <motion.div {...rise(0.25)} className="mt-9 flex flex-wrap items-center gap-3">
               <MagneticButton>
-                <a
-                  href="mailto:info@ethanzhou.ca"
-                  data-hover
-                  className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-card transition-all duration-300 hover:shadow-card-hover active:translate-y-px dark:bg-slate-50 dark:text-slate-900"
-                >
-                  <Mail className="h-4 w-4" />
-                  email me
-                </a>
+                <EmailButton />
               </MagneticButton>
 
               <MagneticButton>
