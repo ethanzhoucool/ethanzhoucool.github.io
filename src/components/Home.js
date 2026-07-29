@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, Mail, Check, Github } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Copy, Check, Github } from 'lucide-react';
 import { FlipPhoto, MagneticButton, ProximityText } from './ui';
 import { GITHUB_URL } from '../data/work';
 
@@ -8,13 +8,15 @@ const EASE = [0.16, 1, 0.3, 1];
 const EMAIL = 'info@ethanzhou.ca';
 
 /*
- * The primary CTA was a bare mailto. That silently does nothing for anyone
- * without a default mail client registered, which is most people reading
- * webmail in a browser tab: the button looked broken.
+ * A copy button, not a mailto.
  *
- * It is still a real anchor, so a configured client opens as before and
- * right-click copy-link-address still works. On top of that the click copies
- * the address and says so, so the button always does something visible.
+ * The original CTA was a bare `mailto:`, which silently does nothing for
+ * anyone without a default mail client registered. That is most people
+ * reading webmail in a browser tab, so the button just looked broken.
+ *
+ * Now the label is the address, pressing it copies, and it says so.
+ * execCommand is kept as a fallback because navigator.clipboard is undefined
+ * outside a secure context.
  */
 function EmailButton() {
   const [copied, setCopied] = useState(false);
@@ -22,31 +24,52 @@ function EmailButton() {
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  const onClick = useCallback(() => {
-    // No preventDefault: the mailto still fires for anyone who can use it.
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(EMAIL).then(
-        () => {
-          setCopied(true);
-          clearTimeout(timer.current);
-          timer.current = setTimeout(() => setCopied(false), 2200);
-        },
-        () => {}
-      );
-    }
+  const flash = useCallback(() => {
+    setCopied(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setCopied(false), 2000);
   }, []);
 
+  const copy = useCallback(() => {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(EMAIL).then(flash, legacyCopy);
+      return;
+    }
+    legacyCopy();
+
+    function legacyCopy() {
+      const el = document.createElement('textarea');
+      el.value = EMAIL;
+      el.setAttribute('readonly', '');
+      el.style.cssText = 'position:absolute;left:-9999px';
+      document.body.appendChild(el);
+      el.select();
+      try {
+        document.execCommand('copy');
+        flash();
+      } finally {
+        document.body.removeChild(el);
+      }
+    }
+  }, [flash]);
+
   return (
-    <a
-      href={`mailto:${EMAIL}`}
-      onClick={onClick}
+    <button
+      type="button"
+      onClick={copy}
       data-hover
-      aria-label={`Email ${EMAIL}`}
-      className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-card transition-all duration-300 hover:shadow-card-hover active:translate-y-px dark:bg-slate-50 dark:text-slate-900"
+      aria-label={`Copy email address ${EMAIL}`}
+      /* Fixed min-width: the label swap shrinks the button from ~205px to
+         ~119px otherwise, which shoves the github button sideways. */
+      className="inline-flex min-w-[13rem] items-center justify-center gap-2 whitespace-nowrap rounded-full bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-card transition-all duration-300 hover:shadow-card-hover active:translate-y-px dark:bg-slate-50 dark:text-slate-900"
     >
-      {copied ? <Check className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
-      {copied ? 'copied to clipboard' : EMAIL}
-    </a>
+      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+      <span>{copied ? 'copied' : EMAIL}</span>
+      {/* Announced to screen readers without shifting the visible label. */}
+      <span aria-live="polite" className="sr-only">
+        {copied ? 'Email address copied to clipboard' : ''}
+      </span>
+    </button>
   );
 }
 
