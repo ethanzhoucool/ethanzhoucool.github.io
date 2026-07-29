@@ -40,7 +40,10 @@ test('experience is reachable, not orphaned', () => {
   window.location.hash = '#/work';
   render(<App />);
   expect(screen.getByText(/^experience$/i)).toBeInTheDocument();
-  expect(screen.getByText(/United Lifts Technologies/i)).toBeInTheDocument();
+  expect(screen.getByText(/United Lift Technologies/i)).toBeInTheDocument();
+  /* The current job was missing from the page entirely. */
+  expect(screen.getByText(/^Revyl$/)).toBeInTheDocument();
+  expect(screen.getByText(/Growth Engineer/i)).toBeInTheDocument();
 });
 
 test('the YouTube admin screenshot is gone from the content page', () => {

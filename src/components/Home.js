@@ -119,8 +119,8 @@ export default function Home({ navigate }) {
               {...rise(0.15)}
               className="mt-6 max-w-[46ch] text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg"
             >
-              engineering student. mobile developer tools during the week,
-              finance videos for 22,000 people the rest of the time.
+              software engineering at western. growth engineer at revyl. finance
+              videos for 20,000 people on the side.
             </motion.p>
 
             <motion.div {...rise(0.25)} className="mt-9 flex flex-wrap items-center gap-3">
@@ -184,7 +184,7 @@ function TwoTracks({ navigate }) {
       title: 'short finance videos, made since 2023',
       body:
         'explainers about investing and personal finance, published under @ethanzhouwealth. mostly under a minute.',
-      stat: '10M+',
+      stat: '6M+',
       statLabel: 'views',
       cta: 'see the content',
       route: 'content',

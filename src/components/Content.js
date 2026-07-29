@@ -13,12 +13,15 @@ const EASE = [0.16, 1, 0.3, 1];
  * a "...more" truncation. It also disagreed with the stat pills sitting
  * directly beneath it (screenshot: 13.8K subs / 219 videos, pills: 22K+ / 150+).
  *
+ * The figures now match LinkedIn (6M+ views, 20K+ followers). The page had
+ * been claiming 10M+ and 22K+, ie. more than Ethan's own public profile.
+ *
  * Removed rather than cropped. The numbers now carry the section.
  */
 
 const STATS = [
-  { value: '10M+', label: 'views across platforms' },
-  { value: '22K+', label: 'followers' },
+  { value: '6M+', label: 'views across platforms' },
+  { value: '20K+', label: 'followers' },
   { value: '200+', label: 'videos published' },
 ];
 
