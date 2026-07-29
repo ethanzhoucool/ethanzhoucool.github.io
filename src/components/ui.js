@@ -151,62 +151,100 @@ export function MagneticButton({ children, strength = 0.22 }) {
 export function ProximityText({ text, className = '' }) {
   const lettersRef = useRef([]);
 
+  const hostRef = useRef(null);
+
   useEffect(() => {
     if (!canHover()) return undefined;
 
+    const host = hostRef.current;
     const mouse = { x: -9999, y: -9999 };
     let centres = [];
-    let raf;
+    let raf = null;
+    let onScreen = true;
 
+    /* Measured in DOCUMENT space, once. The previous version re-measured on
+       every scroll event, which meant 41 getBoundingClientRect calls (one per
+       letter) per event: a forced layout each time, on a page built entirely
+       around scrolling. Viewport position is now derived arithmetically from
+       scrollX/scrollY instead, so scrolling costs nothing. */
     const measure = () => {
+      const sx = window.scrollX;
+      const sy = window.scrollY;
       centres = lettersRef.current.map((el) => {
         if (!el) return null;
         const r = el.getBoundingClientRect();
-        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        return { x: r.left + r.width / 2 + sx, y: r.top + r.height / 2 + sy };
       });
     };
 
     const onMove = (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
+      mouse.x = e.clientX + window.scrollX;
+      mouse.y = e.clientY + window.scrollY;
     };
 
+    const MAX = 120;
     const animate = () => {
-      const MAX = 120;
-      lettersRef.current.forEach((el, i) => {
+      const n = lettersRef.current.length;
+      for (let i = 0; i < n; i += 1) {
+        const el = lettersRef.current[i];
         const c = centres[i];
-        if (!el || !c) return;
+        if (!el || !c) continue;
         const dx = mouse.x - c.x;
         const dy = mouse.y - c.y;
         const dist = Math.hypot(dx, dy);
+        let next = '';
         if (dist < MAX && dist > 0.01) {
           const s = 1 - dist / MAX;
-          el.style.transform = `translate(${(dx / dist) * s * 4}px, ${
-            (dy / dist) * s * 4
-          }px) scale(${1 + s * 0.18})`;
-        } else {
-          el.style.transform = '';
+          next = `translate(${(dx / dist) * s * 4}px, ${(dy / dist) * s * 4}px) scale(${
+            1 + s * 0.18
+          })`;
         }
-      });
+        /* Only touch the DOM when the value actually changes. At rest this
+           loop now performs zero writes instead of 41 per frame. */
+        if (el.style.transform !== next) el.style.transform = next;
+      }
       raf = requestAnimationFrame(animate);
     };
+
+    const start = () => {
+      if (raf === null) raf = requestAnimationFrame(animate);
+    };
+    const stop = () => {
+      if (raf !== null) cancelAnimationFrame(raf);
+      raf = null;
+    };
+
+    /* The hero scrolls away but used to keep animating for the life of the
+       route. Pause it once it leaves the viewport. */
+    const io =
+      host && 'IntersectionObserver' in window
+        ? new IntersectionObserver(([entry]) => {
+            onScreen = entry.isIntersecting;
+            if (onScreen) {
+              measure();
+              start();
+            } else {
+              stop();
+            }
+          })
+        : null;
+    if (io && host) io.observe(host);
 
     measure();
     window.addEventListener('mousemove', onMove, { passive: true });
     window.addEventListener('resize', measure);
-    window.addEventListener('scroll', measure, { passive: true });
-    raf = requestAnimationFrame(animate);
+    if (!io) start();
 
     return () => {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('resize', measure);
-      window.removeEventListener('scroll', measure);
-      cancelAnimationFrame(raf);
+      if (io) io.disconnect();
+      stop();
     };
   }, [text]);
 
   return (
-    <span className={className}>
+    <span ref={hostRef} className={className}>
       {text.split('').map((char, i) => (
         <span
           key={i}

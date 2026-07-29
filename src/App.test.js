@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, waitFor, fireEvent } from '@testing-library/react';
 import App from './App';
 
 /*
@@ -57,4 +57,69 @@ test('no em-dashes in rendered copy', () => {
     expect(container.textContent).not.toMatch(/[—–]/);
     unmount();
   }
+});
+
+/* ── /about ────────────────────────────────────────────────────────
+   The largest and most fragile route, and until now the only one with no
+   coverage at all. It is lazily loaded, so these await the chunk.
+   ────────────────────────────────────────────────────────────────── */
+
+async function renderAbout() {
+  window.location.hash = '#/about';
+  const utils = render(<App />);
+  await screen.findByText(/my philosophy/i);
+  return utils;
+}
+
+test('about renders the whole narrative, in order', async () => {
+  const { container } = await renderAbout();
+
+  /* Split per letter by UncomfortableLetter, so no single node holds it. */
+  expect(container.textContent).toMatch(/uncomfortable/i);
+
+  for (const beat of [
+    /my philosophy/i,
+    /obsessed/i,
+    /concept we use in Judo/i,
+    /leverage/i,
+    /maximize/i,
+    /asymmetry matters/i,
+    /Send an email to someone you admire/i,
+    /opportunities are/i,
+    /rather take/i,
+    /about me/i,
+  ]) {
+    expect(screen.getAllByText(beat).length).toBeGreaterThan(0);
+  }
+});
+
+test('about copy has no em-dashes', async () => {
+  const { container } = await renderAbout();
+  expect(container.textContent).not.toMatch(/[—–]/);
+});
+
+test('the payoff curve is described for screen readers', async () => {
+  await renderAbout();
+  expect(screen.getByRole('img', { name: /payoff curve/i })).toBeInTheDocument();
+});
+
+test('hobby cards are buttons, not click-only divs', async () => {
+  await renderAbout();
+  for (const label of ['jiu jitsu', 'badminton', 'hockey', 'investing']) {
+    const btn = screen.getByRole('button', { name: new RegExp(label, 'i') });
+    expect(btn.tagName).toBe('BUTTON');
+  }
+});
+
+test('the hobby dialog is reachable and closable by keyboard', async () => {
+  await renderAbout();
+
+  fireEvent.click(screen.getByRole('button', { name: /badminton/i }));
+
+  const dialog = await screen.findByRole('dialog');
+  expect(dialog).toHaveAttribute('aria-modal', 'true');
+  expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
+
+  fireEvent.keyDown(document, { key: 'Escape' });
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 });
