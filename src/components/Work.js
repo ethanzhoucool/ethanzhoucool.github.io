@@ -89,7 +89,7 @@ export default function Work() {
           </div>
 
           {/* The report the tool actually renders, not a caption about it. */}
-          <div className="relative flex flex-col items-center justify-center gap-5 overflow-hidden border-t border-slate-200 bg-slate-900 p-8 md:border-l md:border-t-0 dark:border-slate-800">
+          <div data-artifact className="relative flex flex-col items-center justify-center gap-5 overflow-hidden border-t border-slate-200 bg-slate-900 p-8 md:border-l md:border-t-0 dark:border-slate-800">
             <DropoffFigure />
             <div className="select-none text-center font-mono text-[10px] leading-[1.9] text-slate-500">
               {FEATURED.note?.map((line) => (
@@ -114,7 +114,7 @@ export default function Work() {
         className="group mt-5 block overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
       >
         <div className="grid md:grid-cols-[0.9fr_1fr]">
-          <div className="order-last flex flex-col items-center justify-center gap-7 overflow-hidden border-t border-slate-200 bg-slate-900 p-8 md:order-first md:border-r md:border-t-0 dark:border-slate-800">
+          <div data-artifact className="order-last flex flex-col items-center justify-center gap-7 overflow-hidden border-t border-slate-200 bg-slate-900 p-8 md:order-first md:border-r md:border-t-0 dark:border-slate-800">
             <PhoneScan />
           </div>
 
@@ -126,7 +126,7 @@ export default function Work() {
               {FEATURED_TWO.blurb}
             </p>
 
-            <div className="mt-6">
+            <div data-artifact className="mt-6">
               <ScanReport />
             </div>
 
@@ -156,7 +156,7 @@ export default function Work() {
             className="group flex flex-col overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
           >
             {p.media && (
-              <div className="flex h-[224px] items-center justify-center overflow-hidden border-b border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-800">
+              <div data-artifact className="flex h-[224px] items-center justify-center overflow-hidden border-b border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-800">
                 <video
                   src={p.media.src}
                   poster={p.media.poster}
@@ -171,7 +171,7 @@ export default function Work() {
             )}
 
             {p.art && (
-              <div className="flex h-[224px] items-center justify-center overflow-hidden border-b border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-950/40">
+              <div data-artifact className="flex h-[224px] items-center justify-center overflow-hidden border-b border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-950/40">
                 <Artifact name={p.art} />
               </div>
             )}

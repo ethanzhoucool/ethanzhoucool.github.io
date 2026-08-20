@@ -128,7 +128,12 @@ html.cursor-custom * {
   width: 14px;
   height: 14px;
   margin: -7px 0 0 -7px;
-  background: #1e293b;
+  /* White, not slate. `difference` inverts the backdrop, so a white source
+     paints near-black on the paper sections and near-white on the dark
+     artifact panels. A dark source did the opposite: on slate-900 it resolved
+     to rgb(15,18,17) against a rgb(15,23,42) ground and vanished, which left
+     no pointer at all over the feature panels. */
+  background: #ffffff;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
@@ -141,7 +146,7 @@ html.cursor-custom * {
   width: 44px;
   height: 44px;
   margin: -22px 0 0 -22px;
-  background: rgba(37, 99, 235, 0.45);
+  background: rgba(59, 130, 246, 0.5);
   mix-blend-mode: normal;
 }
 
@@ -152,23 +157,21 @@ html.cursor-custom * {
   width: 36px;
   height: 36px;
   margin: -18px 0 0 -18px;
-  border: 1.5px solid rgba(30, 41, 59, 0.28);
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
   border-radius: 50%;
   pointer-events: none;
   z-index: 9998;
+  mix-blend-mode: difference;
   transition: width 0.35s ease, height 0.35s ease, margin 0.35s ease,
     border-color 0.35s ease, opacity 0.2s ease;
-}
-
-:is(.dark) .cursor-ring {
-  border-color: rgba(226, 232, 240, 0.28);
 }
 
 .cursor-ring.hovering {
   width: 60px;
   height: 60px;
   margin: -30px 0 0 -30px;
-  border-color: rgba(37, 99, 235, 0.25);
+  border-color: rgba(96, 165, 250, 0.5);
+  mix-blend-mode: normal;
 }
 
 /* ═══════════════════════════════════════════════════════════════

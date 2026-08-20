@@ -79,8 +79,13 @@ export function CustomCursor() {
 
         if (frame % 4 === 0) {
           const el = document.elementFromPoint(pos.x, pos.y);
+          /* The artifacts live inside the project links, so the whole card
+             counts as hoverable and the cursor used to balloon to 44px over
+             the very detail it is sitting on. Stay small inside them. */
           const next = !!(
-            el && el.closest('a, button, [role="button"], [data-hover]')
+            el &&
+            el.closest('a, button, [role="button"], [data-hover]') &&
+            !el.closest('[data-artifact]')
           );
           if (next !== hovering) {
             hovering = next;
