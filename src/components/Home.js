@@ -180,7 +180,7 @@ function TwoTracks({ navigate }) {
       kicker: 'the audience',
       title: 'short finance videos, made since 2023',
       body: 'short explainers about investing, under @ethanzhouwealth.',
-      stat: '6M+',
+      stat: '10M+',
       statLabel: 'views',
       cta: 'see the content',
       route: 'content',

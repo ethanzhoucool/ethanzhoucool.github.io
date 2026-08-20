@@ -13,23 +13,25 @@ const EASE = [0.16, 1, 0.3, 1];
  * a "...more" truncation. It also disagreed with the stat pills sitting
  * directly beneath it (screenshot: 13.8K subs / 219 videos, pills: 22K+ / 150+).
  *
- * The figures now match LinkedIn (6M+ views, 20K+ followers). The page had
- * been claiming 10M+ and 22K+, ie. more than Ethan's own public profile.
+ * Figures re-checked against the channel itself on 2026-08-20: youtube alone
+ * reports 6,496,771 views over 255 videos and 14.1K subscribers. The
+ * cross-platform total is Ethan's own figure and is labelled as such, because
+ * instagram and tiktok are not publicly countable the way youtube is.
  *
  * Removed rather than cropped. The numbers now carry the section.
  */
 
 const STATS = [
-  { value: '6M+', label: 'views across platforms' },
+  { value: '10M+', label: 'views, all platforms' },
   { value: '20K+', label: 'followers' },
-  { value: '200+', label: 'videos published' },
+  { value: '255', label: 'videos on youtube' },
 ];
 
 const PLATFORMS = [
   {
     name: 'youtube',
     handle: '@Ethanzhouwealth',
-    detail: '13.8K subscribers',
+    detail: '14.1K subscribers · 6.5M views',
     href: 'https://www.youtube.com/@Ethanzhouwealth',
     Icon: Youtube,
   },

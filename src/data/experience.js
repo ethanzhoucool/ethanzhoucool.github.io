@@ -50,7 +50,7 @@ export const ROLES = [
     period: 'Aug 2023 to present',
     place: 'youtube, tiktok, instagram',
     current: true,
-    points: ['6M+ views and 20K+ followers across platforms'],
+    points: ['10M+ views and 20K+ followers across platforms', '6.5M of those on youtube, over 255 videos'],
   },
 ];
 

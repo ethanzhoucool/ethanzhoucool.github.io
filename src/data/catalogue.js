@@ -1,18 +1,45 @@
 /*
- * Every YouTube short on @Ethanzhouwealth, view counts only, as of Aug 2026.
- * Scraped from the public channel, not rounded, not curated.
+ * Every video on youtube.com/@Ethanzhouwealth, view counts only, descending.
+ * Pulled 255 of the 255 the channel lists, on 2026-08-20.
  *
- * The about page deals these out one at a time. That only means anything
- * because they are the real numbers: 201 at the bottom, 187,000 at the top,
- * and no way to tell in advance which video is which.
+ * YOUTUBE ONLY. It is not the cross-platform figure — instagram and tiktok
+ * carry their own audience and are not counted here. The about page says so
+ * on the surface, because a number nobody can check is worth nothing.
+ *
+ * The shape is the point: 22 at the bottom, 1,500,000 at the top, and a median
+ * of 1,900. One video is 23% of the whole channel.
  */
 export const CATALOGUE = [
-  187000, 102000, 67000, 45000, 43000, 29000, 24000, 24000, 24000, 22000,
-  22000, 21000, 20000, 18000, 17000, 16000, 16000, 14000, 13000, 13000,
-  11000, 11000, 10000, 9700, 7900, 6900, 6700, 6500, 5200, 5200,
-  4400, 4100, 3600, 3400, 3300, 2500, 2300, 2100, 2100, 1900,
-  962, 948, 354, 234, 223, 212, 209, 201,
+  1500000, 1200000, 341000, 334000, 260000, 259000, 253000, 187000, 137000,
+  123000, 102000, 93000, 92000, 89000, 78000, 67000, 45000, 44000, 43000,
+  38000, 36000, 35000, 35000, 33000, 32000, 29000, 27000, 27000, 27000,
+  26000, 24000, 24000, 24000, 24000, 23000, 23000, 22000, 22000, 22000,
+  22000, 21000, 20000, 19000, 18000, 17000, 16000, 16000, 15000, 14000,
+  14000, 14000, 13000, 13000, 11000, 11000, 11000, 10000, 10000, 9700, 9300,
+  8700, 8300, 8100, 7900, 7500, 7300, 7000, 6900, 6800, 6700, 6500, 5700,
+  5700, 5300, 5200, 5200, 5000, 4900, 4900, 4700, 4600, 4400, 4300, 4200,
+  4200, 4100, 4100, 4000, 4000, 4000, 3900, 3900, 3900, 3800, 3800, 3600,
+  3600, 3500, 3400, 3400, 3300, 3200, 3100, 3100, 3000, 3000, 2900, 2700,
+  2700, 2600, 2600, 2500, 2500, 2500, 2400, 2300, 2300, 2200, 2200, 2100,
+  2100, 2100, 2100, 2000, 2000, 1900, 1900, 1900, 1800, 1800, 1800, 1800,
+  1800, 1700, 1600, 1600, 1600, 1500, 1500, 1500, 1500, 1500, 1500, 1500,
+  1500, 1500, 1500, 1500, 1500, 1500, 1400, 1400, 1400, 1400, 1400, 1300,
+  1300, 1300, 1300, 1300, 1300, 1300, 1300, 1200, 1200, 1200, 1200, 1100,
+  1100, 1100, 1100, 1100, 1100, 1100, 1100, 1100, 1100, 1100, 1000, 1000,
+  1000, 1000, 1000, 977, 970, 962, 962, 961, 948, 919, 903, 898, 896, 853,
+  846, 842, 837, 837, 820, 810, 794, 783, 782, 773, 768, 765, 757, 742, 728,
+  725, 712, 706, 698, 691, 689, 685, 670, 668, 660, 656, 656, 654, 625, 607,
+  593, 588, 570, 567, 563, 557, 540, 536, 522, 521, 443, 385, 382, 372, 354,
+  248, 234, 232, 223, 212, 209, 201, 174, 169, 159, 131, 106, 91, 73, 59, 22
 ];
 
-export const CATALOGUE_TOTAL = CATALOGUE.reduce((a, b) => a + b, 0);
-export const CATALOGUE_BEST = CATALOGUE[0];
+export const CATALOGUE_TOTAL = 6496771;
+export const CATALOGUE_COUNT = 255;
+
+/* The best-performing video on the channel is, with no help from me,
+   an explainer about asymmetric risk. */
+export const TOP_VIDEO = {
+  views: 1500000,
+  title: "asymmetric risk in jjk terms",
+  url: "https://www.youtube.com/watch?v=JV3IohwR3Vo",
+};
