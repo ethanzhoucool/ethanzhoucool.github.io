@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, Copy, Check, Github } from 'lucide-react';
-import { FlipPhoto, MagneticButton, ProximityText } from './ui';
+import { FlipPhoto, MagneticButton } from './ui';
 import { GITHUB_URL } from '../data/work';
 
 const EASE = [0.16, 1, 0.3, 1];
@@ -102,25 +102,23 @@ export default function Home({ navigate }) {
       <section className="mx-auto flex min-h-[calc(100dvh-68px)] max-w-5xl flex-col justify-center px-6 pt-8 pb-16 md:pt-16">
         <div className="grid items-center gap-10 md:grid-cols-[1.35fr_0.65fr] md:gap-16">
           <div>
+            {/* Plain text, not per-letter spans. ProximityText marked every
+                letter aria-hidden and appended an sr-only copy of the whole
+                line, so selecting the headline picked up both and pasting gave
+                you "i build software,i build software,". */}
             <motion.h1
               {...rise(0.05)}
-              /* Sized so "and things people watch." holds one line inside the
-                 616px text column. At 4.2rem it wrapped to three lines. */
-              className="text-[2.15rem] font-semibold leading-[1.08] tracking-tight text-slate-900 dark:text-slate-50 sm:text-[2.9rem] md:text-[3.3rem]"
+              className="text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-slate-900 dark:text-slate-50 sm:text-[3.1rem] md:text-[3.5rem]"
             >
-              <ProximityText text="i build software," />
-              <br />
-              <span className="text-slate-400 dark:text-slate-500">
-                <ProximityText text="and things people watch." />
-              </span>
+              hi, i&rsquo;m ethan.
             </motion.h1>
 
             <motion.p
               {...rise(0.15)}
-              className="mt-6 max-w-[46ch] text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg"
+              className="mt-6 max-w-[48ch] text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg"
             >
-              software engineering at western. growth engineer at revyl. finance
-              videos for 20,000 people on the side.
+              i build developer tools for mobile teams, and make short videos
+              about money.
             </motion.p>
 
             <motion.div {...rise(0.25)} className="mt-9 flex flex-wrap items-center gap-3">
@@ -171,8 +169,7 @@ function TwoTracks({ navigate }) {
       key: 'work',
       kicker: 'the building',
       title: 'developer tools for mobile teams',
-      body:
-        'ci bots, security scanners and sdks that catch the things manual testing misses: leaked screens, dead flows, silent drop-off.',
+      body: 'ci bots, scanners and sdks that catch what manual testing misses.',
       stat: '20+',
       statLabel: 'public repos',
       cta: 'see the work',
@@ -182,8 +179,7 @@ function TwoTracks({ navigate }) {
       key: 'content',
       kicker: 'the audience',
       title: 'short finance videos, made since 2023',
-      body:
-        'explainers about investing and personal finance, published under @ethanzhouwealth. mostly under a minute.',
+      body: 'short explainers about investing, under @ethanzhouwealth.',
       stat: '6M+',
       statLabel: 'views',
       cta: 'see the content',
@@ -242,13 +238,12 @@ function TwoTracks({ navigate }) {
         transition={{ duration: 0.6, delay: 0.2 }}
         className="mt-10 text-sm text-slate-500 dark:text-slate-500"
       >
-        why i pick the projects i pick:{' '}
         <button
           onClick={() => navigate('about')}
           data-hover
           className="inline-flex items-center gap-1 font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 transition-colors hover:decoration-slate-900 dark:text-slate-100 dark:decoration-slate-600 dark:hover:decoration-slate-100"
         >
-          asymmetric risk
+          more about me
           <ArrowUpRight className="h-3.5 w-3.5" />
         </button>
       </motion.p>

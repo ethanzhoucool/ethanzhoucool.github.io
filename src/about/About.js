@@ -11,6 +11,8 @@ import { EverywhereSection } from './Everywhere';
 import { ContrastSection } from './Contrast';
 import { FinalStatement } from './Final';
 import { HobbiesSection, QuickFacts } from './Personal';
+import Fork from './Fork';
+import PublishMachine from './PublishMachine';
 
 /* ════════════════════════════════════════
    ABOUT — the scroll narrative
@@ -58,6 +60,16 @@ export default function About() {
 
         {/* 8 — The turn */}
         <EverywhereSection />
+
+        {/* 8a — Put the decision to the reader before answering it */}
+        <div className="py-24 sm:py-32">
+          <Fork />
+        </div>
+
+        {/* 8b — And then let them run the experiment on my real numbers */}
+        <div className="pb-24 sm:pb-32">
+          <PublishMachine />
+        </div>
 
         {/* 9 — Why people don't take them, and the level lever */}
         <ContrastSection />
