@@ -1,8 +1,14 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, Github } from 'lucide-react';
-import { FEATURED, PROJECTS, MORE_REPOS, GITHUB_URL } from '../data/work';
+import { FEATURED, FEATURED_TWO, PROJECTS, MORE_REPOS, GITHUB_URL } from '../data/work';
 import Experience from './Experience';
+import PhoneScan from './artifacts/PhoneScan';
+import ScanReport from './artifacts/ScanReport';
+import DropoffFigure from './artifacts/DropoffFigure';
+import BotComment from './artifacts/BotComment';
+import DeviceGif from './artifacts/DeviceGif';
+import RobotPath from './artifacts/RobotPath';
 
 const EASE = [0.16, 1, 0.3, 1];
 
@@ -12,12 +18,19 @@ const EASE = [0.16, 1, 0.3, 1];
  * The old projects tab had exactly one card on it while ~20 public repos sat
  * on GitHub unlinked.
  *
- * Deliberately typographic. There are no real screenshots for most of these
- * repos, and a grid of hand-built <div> mockups pretending to be product UI is
- * the single most obvious tell that a page was generated rather than designed.
- * Where a real asset exists (explain-my-code) it is used; everywhere else the
- * type does the work.
+ * Each project renders its own output rather than a screenshot of a product
+ * that does not exist: the comment the CI bot leaves on a PR, the report the
+ * scanner prints, the frame the recorder hands back, the path the robot
+ * actually drove. These are the artifacts, drawn in the DOM, so they stay
+ * sharp and their text is real text.
  */
+
+function Artifact({ name }) {
+  if (name === 'comment') return <BotComment />;
+  if (name === 'gif') return <DeviceGif />;
+  if (name === 'robot') return <RobotPath />;
+  return null;
+}
 export default function Work() {
   const reduce = useReducedMotion();
 
@@ -75,12 +88,10 @@ export default function Work() {
             </span>
           </div>
 
-          {/* Typographic panel rather than a fabricated product screenshot. */}
-          <div
-            aria-hidden="true"
-            className="relative hidden items-center justify-center overflow-hidden border-l border-slate-200 bg-slate-900 md:flex dark:border-slate-800"
-          >
-            <div className="pointer-events-none select-none px-6 text-center font-mono text-[11px] leading-[1.9] tracking-tight text-slate-500">
+          {/* The report the tool actually renders, not a caption about it. */}
+          <div className="relative flex flex-col items-center justify-center gap-5 overflow-hidden border-t border-slate-200 bg-slate-900 p-8 md:border-l md:border-t-0 dark:border-slate-800">
+            <DropoffFigure />
+            <div className="select-none text-center font-mono text-[10px] leading-[1.9] text-slate-500">
               {FEATURED.note?.map((line) => (
                 <React.Fragment key={line}>
                   {line}
@@ -88,7 +99,46 @@ export default function Work() {
                 </React.Fragment>
               ))}
             </div>
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 via-transparent to-transparent" />
+          </div>
+        </div>
+      </motion.a>
+
+      {/* Second feature, mirrored. The phone demo needs the height, and
+          alternating the dark panel keeps the two rows from rhyming. */}
+      <motion.a
+        {...enter(2)}
+        href={FEATURED_TWO.repo}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-hover
+        className="group mt-5 block overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
+      >
+        <div className="grid md:grid-cols-[0.9fr_1fr]">
+          <div className="order-last flex flex-col items-center justify-center gap-7 overflow-hidden border-t border-slate-200 bg-slate-900 p-8 md:order-first md:border-r md:border-t-0 dark:border-slate-800">
+            <PhoneScan />
+          </div>
+
+          <div className="p-8 sm:p-10">
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-4xl">
+              {FEATURED_TWO.title}
+            </h2>
+            <p className="mt-4 max-w-[44ch] text-base leading-relaxed text-slate-600 dark:text-slate-400">
+              {FEATURED_TWO.blurb}
+            </p>
+
+            <div className="mt-6">
+              <ScanReport />
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              {FEATURED_TWO.stack.map((s) => (
+                <Chip key={s}>{s}</Chip>
+              ))}
+            </div>
+            <span className="mt-7 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400">
+              source on github
+              <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </span>
           </div>
         </div>
       </motion.a>
@@ -103,22 +153,26 @@ export default function Work() {
             target="_blank"
             rel="noopener noreferrer"
             data-hover
-            className={`group flex flex-col overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700 ${
-              p.media ? 'sm:col-span-2' : ''
-            }`}
+            className="group flex flex-col overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
           >
             {p.media && (
-              <div className="aspect-[21/9] overflow-hidden bg-slate-100 dark:bg-slate-800">
+              <div className="flex h-[224px] items-center justify-center overflow-hidden border-b border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-800">
                 <video
                   src={p.media.src}
                   poster={p.media.poster}
                   preload="metadata"
                   className="h-full w-full object-cover"
-                  autoPlay
+                  autoPlay={!reduce}
                   loop
                   muted
                   playsInline
                 />
+              </div>
+            )}
+
+            {p.art && (
+              <div className="flex h-[224px] items-center justify-center overflow-hidden border-b border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-950/40">
+                <Artifact name={p.art} />
               </div>
             )}
 

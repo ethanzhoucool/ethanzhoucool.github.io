@@ -6,9 +6,11 @@
  * (gta7-js, imposter-word) are deliberately not here: they are still on the
  * GitHub profile, but they are not what this page is arguing.
  *
- * `media` is only set where a real asset exists on disk. Everything else stays
- * typographic on purpose: a hand-drawn <div> mockup pretending to be a
- * screenshot is worse than no screenshot.
+ * `art` names the artifact each project renders. These are not decorative
+ * mockups of a product that does not exist — each one is the shape of that
+ * tool's real output: the comment the bot leaves, the report the scanner
+ * prints, the frame the recorder returns. `media` is still only set where a
+ * real recorded asset exists on disk.
  */
 
 export const FEATURED = {
@@ -21,18 +23,23 @@ export const FEATURED = {
   live: null,
   /* Shown in the dark panel beside the feature copy. */
   note: ['sdk + cli + report generator', 'built on revyl atlas and posthog'],
+  art: 'dropoff',
+};
+
+/* The second feature row. It gets the full-width treatment because its
+   artifact is the phone demo, which needs the height. */
+export const FEATURED_TWO = {
+  slug: 'redaction-checker',
+  title: 'Redaction Checker',
+  blurb:
+    'ios and android snapshot the screen every time you background an app. if a balance or a card number is on screen when that happens, it lands in the recents switcher in plaintext. banks fail this constantly and almost nobody tests for it.',
+  stack: ['Python', 'iOS', 'Android', 'MASVS'],
+  repo: 'https://github.com/ethanzhoucool/redaction-checker',
+  live: null,
+  art: 'scan',
 };
 
 export const PROJECTS = [
-  {
-    slug: 'redaction-checker',
-    title: 'Redaction Checker',
-    blurb:
-      'catches sensitive screens that leak into the ios app switcher and android recents, which is a real banking-app failure almost nobody tests for. checks against MASVS-STORAGE-9 and PCI.',
-    stack: ['Python', 'iOS', 'Android', 'MASVS'],
-    repo: 'https://github.com/ethanzhoucool/redaction-checker',
-    live: null,
-  },
   {
     slug: 'atlas-pr-diff',
     title: 'Atlas PR Diff',
@@ -41,6 +48,7 @@ export const PROJECTS = [
     stack: ['Python', 'GitHub Actions', 'CI'],
     repo: 'https://github.com/ethanzhoucool/atlas-pr-diff',
     live: null,
+    art: 'comment',
   },
   {
     slug: 'autonomous-robot',
@@ -50,6 +58,7 @@ export const PROJECTS = [
     stack: ['C++', 'Arduino', 'LiDAR', 'PID'],
     repo: 'https://github.com/ethanzhoucool/1050-autonomous-robot',
     live: null,
+    art: 'robot',
   },
   {
     slug: 'device-gif-maker',
@@ -59,6 +68,7 @@ export const PROJECTS = [
     stack: ['Python', 'ffmpeg'],
     repo: 'https://github.com/ethanzhoucool/device-gif-maker',
     live: null,
+    art: 'gif',
   },
   {
     slug: 'explain-my-code',
