@@ -1,0 +1,54 @@
+name: ci
+
+# Every branch and every pull request. The site had no automation at all, so a
+# broken build only showed up when someone ran `npm run deploy` by hand.
+on:
+  push:
+    branches-ignore:
+      - gh-pages
+  pull_request:
+
+# A newer push to the same branch makes the in-flight run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test -- --watchAll=false
+
+      # CI=true is already set by Actions, which makes react-scripts treat any
+      # eslint warning as a build failure. That is deliberate: unused imports
+      # and dead vars should not reach the branch that deploys.
+      - name: Build
+        run: npm run build
+
+      - name: Check the custom domain survived the build
+        run: |
+          test -f build/CNAME || {
+            echo "::error::build/CNAME is missing — deploying this would drop ethanzhou.ca"
+            exit 1
+          }
+          echo "CNAME: $(cat build/CNAME)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: build
+          retention-days: 7
