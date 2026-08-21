@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import PublishMachine from './PublishMachine';
 import Fork from './Fork';
-import { CATALOGUE, CATALOGUE_TOTAL, CATALOGUE_COUNT } from '../data/catalogue';
+import { CATALOGUE_TOTAL, CATALOGUE_COUNT } from '../data/catalogue';
 
 /* These cover the two pieces of the about page that respond to the reader
    rather than to the scrollbar, so a regression shows up as a failing test

@@ -270,3 +270,64 @@ html.cursor-custom * {
   z-index: 1;
   opacity: 0.4;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Entrance
+
+   Every block on the home, work and content pages used to mount at
+   opacity 0 and wait for framer-motion to animate it up. That put the
+   whole page behind a JS animation loop: on the live site all seven
+   content blocks measured opacity 0 several seconds after load, because
+   requestAnimationFrame is throttled in a tab that is not focused. Open
+   the site in a background tab, or on a slow connection, and you got a
+   blank page.
+
+   This does the same thing in CSS. Animations run off the document
+   timeline rather than rAF, so they finish whether or not the tab is
+   focused, `both` leaves the element at its final state, and if the
+   stylesheet never arrives the content is simply visible.
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise-in 0.62s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger, in the order a reader meets things. */
+.rise-1 { animation-delay: 60ms; }
+.rise-2 { animation-delay: 130ms; }
+.rise-3 { animation-delay: 200ms; }
+.rise-4 { animation-delay: 270ms; }
+.rise-5 { animation-delay: 340ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+}
+
+/* Route change. Keyed on the route so a remount replays it; the element is
+   fully opaque at rest, so a stalled animation can never hide a page. */
+@keyframes route-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.route-fade {
+  animation: route-fade-in 0.25s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-fade {
+    animation: none;
+  }
+}

@@ -1,8 +1,8 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, Github } from 'lucide-react';
 import { FEATURED, FEATURED_TWO, PROJECTS, MORE_REPOS, GITHUB_URL } from '../data/work';
 import Experience from './Experience';
+
 import PhoneScan from './artifacts/PhoneScan';
 import ScanReport from './artifacts/ScanReport';
 import DropoffFigure from './artifacts/DropoffFigure';
@@ -10,7 +10,13 @@ import BotComment from './artifacts/BotComment';
 import DeviceGif from './artifacts/DeviceGif';
 import RobotPath from './artifacts/RobotPath';
 
-const EASE = [0.16, 1, 0.3, 1];
+/* Read once. Autoplaying video is motion, and a reduced-motion visitor should
+   get a poster frame and a play button instead. */
+const PREFERS_REDUCED_MOTION =
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 
 /*
  * Work.
@@ -32,42 +38,28 @@ function Artifact({ name }) {
   return null;
 }
 export default function Work() {
-  const reduce = useReducedMotion();
-
-  const enter = (i = 0) =>
-    reduce
-      ? {}
-      : {
-          initial: { opacity: 0, y: 26 },
-          whileInView: { opacity: 1, y: 0 },
-          viewport: { once: true, amount: 0.2 },
-          transition: { duration: 0.6, delay: i * 0.07, ease: EASE },
-        };
 
   return (
     <section className="mx-auto max-w-5xl px-6 pt-10 pb-24">
-      <motion.h1
-        {...enter(0)}
-        className="text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-5xl"
+      <h1
+        className="rise rise-1 text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-5xl"
       >
         work
-      </motion.h1>
-      <motion.p
-        {...enter(1)}
-        className="mt-4 max-w-[52ch] text-base leading-relaxed text-slate-600 dark:text-slate-400"
+      </h1>
+      <p
+        className="rise rise-2 mt-4 max-w-[52ch] text-base leading-relaxed text-slate-600 dark:text-slate-400"
       >
         mostly developer tooling for mobile teams. all of it is public, source
         included.
-      </motion.p>
+      </p>
 
       {/* Feature row. Full-width, its own layout family. */}
-      <motion.a
-        {...enter(2)}
+      <a
         href={FEATURED.repo}
         target="_blank"
         rel="noopener noreferrer"
         data-hover
-        className="group mt-12 block overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
+        className="rise rise-3 group mt-12 block overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
       >
         <div className="grid md:grid-cols-[1fr_0.9fr]">
           <div className="p-8 sm:p-10">
@@ -101,17 +93,16 @@ export default function Work() {
             </div>
           </div>
         </div>
-      </motion.a>
+      </a>
 
       {/* Second feature, mirrored. The phone demo needs the height, and
           alternating the dark panel keeps the two rows from rhyming. */}
-      <motion.a
-        {...enter(2)}
+      <a
         href={FEATURED_TWO.repo}
         target="_blank"
         rel="noopener noreferrer"
         data-hover
-        className="group mt-5 block overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
+        className="rise rise-4 group mt-5 block overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
       >
         <div className="grid md:grid-cols-[0.9fr_1fr]">
           <div data-artifact className="order-last flex flex-col items-center justify-center gap-7 overflow-hidden border-t border-slate-200 bg-slate-900 p-8 md:order-first md:border-r md:border-t-0 dark:border-slate-800">
@@ -141,14 +132,13 @@ export default function Work() {
             </span>
           </div>
         </div>
-      </motion.a>
+      </a>
 
       {/* Grid. Exactly as many cells as there are projects. */}
       <div className="mt-5 grid gap-4 sm:grid-cols-2 md:gap-5">
         {PROJECTS.map((p, i) => (
-          <motion.a
+          <a
             key={p.slug}
-            {...enter(i)}
             href={p.live || p.repo}
             target="_blank"
             rel="noopener noreferrer"
@@ -162,7 +152,7 @@ export default function Work() {
                   poster={p.media.poster}
                   preload="metadata"
                   className="h-full w-full object-cover"
-                  autoPlay={!reduce}
+                  autoPlay={!PREFERS_REDUCED_MOTION}
                   loop
                   muted
                   playsInline
@@ -195,14 +185,13 @@ export default function Work() {
                 <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </span>
             </div>
-          </motion.a>
+          </a>
         ))}
       </div>
 
       {/* Breadth without more cards. */}
-      <motion.p
-        {...enter(0)}
-        className="mt-10 text-sm leading-relaxed text-slate-500 dark:text-slate-500"
+      <p
+        className="rise rise-1 mt-10 text-sm leading-relaxed text-slate-500 dark:text-slate-500"
       >
         also{' '}
         {MORE_REPOS.map((r, i) => (
@@ -231,7 +220,7 @@ export default function Work() {
           github
         </a>
         .
-      </motion.p>
+      </p>
 
       {/* Previously unreachable: rendered in App.js but no nav item pointed at it. */}
       <Experience />

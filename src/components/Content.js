@@ -1,8 +1,6 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, Instagram, Youtube, Mail } from 'lucide-react';
 
-const EASE = [0.16, 1, 0.3, 1];
 
 /*
  * Content.
@@ -45,38 +43,24 @@ const PLATFORMS = [
 ];
 
 export default function Content() {
-  const reduce = useReducedMotion();
-
-  const enter = (i = 0) =>
-    reduce
-      ? {}
-      : {
-          initial: { opacity: 0, y: 26 },
-          whileInView: { opacity: 1, y: 0 },
-          viewport: { once: true, amount: 0.2 },
-          transition: { duration: 0.6, delay: i * 0.07, ease: EASE },
-        };
 
   return (
     <section className="mx-auto max-w-5xl px-6 pt-10 pb-24">
-      <motion.h1
-        {...enter(0)}
-        className="text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-5xl"
+      <h1
+        className="rise rise-1 text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-5xl"
       >
         content
-      </motion.h1>
-      <motion.p
-        {...enter(1)}
-        className="mt-4 max-w-[52ch] text-base leading-relaxed text-slate-600 dark:text-slate-400"
+      </h1>
+      <p
+        className="rise rise-2 mt-4 max-w-[52ch] text-base leading-relaxed text-slate-600 dark:text-slate-400"
       >
         i make short videos about investing and personal finance under
         @ethanzhouwealth. started august 2023, still going.
-      </motion.p>
+      </p>
 
       {/* Numbers, in plain layout. No cards, no coloured pill soup. */}
-      <motion.div
-        {...enter(2)}
-        className="mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-card border border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800 sm:grid-cols-3"
+      <div
+        className="rise rise-3 mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-card border border-slate-200 bg-slate-200 dark:border-slate-800 dark:bg-slate-800 sm:grid-cols-3"
       >
         {STATS.map((s) => (
           <div
@@ -91,14 +75,13 @@ export default function Content() {
             </div>
           </div>
         ))}
-      </motion.div>
+      </div>
 
       {/* Platforms. Different layout family from the stat strip above. */}
       <div className="mt-5 grid gap-4 sm:grid-cols-2 md:gap-5">
         {PLATFORMS.map((p, i) => (
-          <motion.a
+          <a
             key={p.name}
-            {...enter(i)}
             href={p.href}
             target="_blank"
             rel="noopener noreferrer"
@@ -117,12 +100,12 @@ export default function Content() {
               </span>
             </span>
             <ArrowUpRight className="h-4 w-4 flex-none text-blue-600 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 dark:text-blue-400" />
-          </motion.a>
+          </a>
         ))}
       </div>
 
       {/* Brand work. */}
-      <motion.div {...enter(0)} className="mt-16">
+      <div className="rise rise-1 mt-16">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
           brands i have worked with
         </h2>
@@ -154,7 +137,7 @@ export default function Content() {
             info@ethanzhou.ca
           </a>
         </p>
-      </motion.div>
+      </div>
     </section>
   );
 }

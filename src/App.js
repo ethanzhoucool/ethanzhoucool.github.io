@@ -137,15 +137,15 @@ const Portfolio = () => {
         <main id="main">
           {/* No AnimatePresence here on purpose. `mode="wait"` keeps the
               outgoing page mounted until its exit finishes, which meant a
-              click on "about" left the work page on screen. A keyed fade-in
-              gives the same feel with none of the handover risk, and the new
-              route is in the DOM immediately for anchors and screen readers. */}
-          <motion.div
-            key={route}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-          >
+              click on "about" left the work page on screen.
+
+              The fade is CSS and keyed on the route, so remounting replays it.
+              It used to be a framer-motion initial/animate pair, which meant
+              the whole page mounted at opacity 0 and stayed there until a
+              requestAnimationFrame callback ran — and rAF is throttled in an
+              unfocused tab, so opening the site in a background tab showed
+              nothing at all. */}
+          <div key={route} className="route-fade">
             {route === 'home' && <Home navigate={navigate} />}
             {route === 'work' && <Work />}
             {route === 'content' && <Content />}
@@ -154,7 +154,7 @@ const Portfolio = () => {
                 <About />
               </Suspense>
             )}
-          </motion.div>
+          </div>
         </main>
 
         <footer className="mx-auto max-w-5xl px-6 pb-12 pt-8">

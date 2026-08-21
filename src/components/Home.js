@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, Copy, Check, Github } from 'lucide-react';
 import { FlipPhoto, MagneticButton } from './ui';
 import { GITHUB_URL } from '../data/work';
 
-const EASE = [0.16, 1, 0.3, 1];
 const EMAIL = 'info@ethanzhou.ca';
 
 /*
@@ -87,16 +85,6 @@ function EmailButton() {
  * no trust strip, no scroll cue.
  */
 export default function Home({ navigate }) {
-  const reduce = useReducedMotion();
-  const rise = (delay) =>
-    reduce
-      ? {}
-      : {
-          initial: { opacity: 0, y: 24 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.7, delay, ease: EASE },
-        };
-
   return (
     <>
       <section className="mx-auto flex min-h-[calc(100dvh-68px)] max-w-5xl flex-col justify-center px-6 pt-8 pb-16 md:pt-16">
@@ -106,22 +94,20 @@ export default function Home({ navigate }) {
                 letter aria-hidden and appended an sr-only copy of the whole
                 line, so selecting the headline picked up both and pasting gave
                 you "i build software,i build software,". */}
-            <motion.h1
-              {...rise(0.05)}
-              className="text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-slate-900 dark:text-slate-50 sm:text-[3.1rem] md:text-[3.5rem]"
+            <h1
+              className="rise rise-1 text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-slate-900 dark:text-slate-50 sm:text-[3.1rem] md:text-[3.5rem]"
             >
               hi, i&rsquo;m ethan.
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              {...rise(0.15)}
-              className="mt-6 max-w-[48ch] text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg"
+            <p
+              className="rise rise-2 mt-6 max-w-[48ch] text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg"
             >
               i build developer tools for mobile teams, and make short videos
               about money.
-            </motion.p>
+            </p>
 
-            <motion.div {...rise(0.25)} className="mt-9 flex flex-wrap items-center gap-3">
+            <div className="rise rise-3 mt-9 flex flex-wrap items-center gap-3">
               <MagneticButton>
                 <EmailButton />
               </MagneticButton>
@@ -138,15 +124,12 @@ export default function Home({ navigate }) {
                   github
                 </a>
               </MagneticButton>
-            </motion.div>
+            </div>
           </div>
 
-          <motion.div
-            {...rise(0.2)}
-            className="order-first flex justify-center md:order-none md:justify-end"
-          >
+          <div className="rise rise-4 order-first flex justify-center md:order-none md:justify-end">
             <FlipPhoto className="h-40 w-40 sm:h-52 sm:w-52 md:h-60 md:w-60" />
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -162,8 +145,6 @@ export default function Home({ navigate }) {
  * building and the audience carry the same weight.
  */
 function TwoTracks({ navigate }) {
-  const reduce = useReducedMotion();
-
   const tracks = [
     {
       key: 'work',
@@ -191,15 +172,12 @@ function TwoTracks({ navigate }) {
     <section className="mx-auto max-w-5xl px-6 pb-24">
       <div className="grid gap-4 md:grid-cols-2 md:gap-5">
         {tracks.map((t, i) => (
-          <motion.button
+          <button
             key={t.key}
+            type="button"
             onClick={() => navigate(t.route)}
             data-hover
-            initial={reduce ? false : { opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.6, delay: i * 0.08, ease: EASE }}
-            className="group relative flex flex-col rounded-card border border-slate-200 bg-white/70 p-7 text-left transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700 sm:p-8"
+            className={`rise rise-${i + 4} group relative flex flex-col rounded-card border border-slate-200 bg-white/70 p-7 text-left transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700 sm:p-8`}
           >
             <span className="text-xs uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
               {t.kicker}
@@ -227,17 +205,11 @@ function TwoTracks({ navigate }) {
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
             </div>
-          </motion.button>
+          </button>
         ))}
       </div>
 
-      <motion.p
-        initial={reduce ? false : { opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="mt-10 text-sm text-slate-500 dark:text-slate-500"
-      >
+      <p className="rise rise-5 mt-10 text-sm text-slate-500 dark:text-slate-500">
         <button
           onClick={() => navigate('about')}
           data-hover
@@ -246,7 +218,7 @@ function TwoTracks({ navigate }) {
           more about me
           <ArrowUpRight className="h-3.5 w-3.5" />
         </button>
-      </motion.p>
+      </p>
     </section>
   );
 }

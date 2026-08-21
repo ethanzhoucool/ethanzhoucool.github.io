@@ -1,8 +1,6 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import { ROLES, EDUCATION } from '../data/experience';
 
-const EASE = [0.16, 1, 0.3, 1];
 
 /*
  * Experience.
@@ -15,32 +13,19 @@ const EASE = [0.16, 1, 0.3, 1];
  * on every row. Data lives in src/data/experience.js.
  */
 export default function Experience() {
-  const reduce = useReducedMotion();
-
-  const enter = (i = 0) =>
-    reduce
-      ? {}
-      : {
-          initial: { opacity: 0, y: 20 },
-          whileInView: { opacity: 1, y: 0 },
-          viewport: { once: true, amount: 0.3 },
-          transition: { duration: 0.6, delay: i * 0.06, ease: EASE },
-        };
 
   return (
     <div className="mt-20 border-t border-slate-200 pt-14 dark:border-slate-800">
-      <motion.h2
-        {...enter(0)}
-        className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50"
+      <h2
+        className="rise rise-1 text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50"
       >
         experience
-      </motion.h2>
+      </h2>
 
       <div className="mt-8 divide-y divide-slate-200 dark:divide-slate-800">
         {ROLES.map((r, i) => (
-          <motion.div
+          <div
             key={`${r.org}-${r.role}`}
-            {...enter(i)}
             className="grid gap-3 py-7 sm:grid-cols-[0.8fr_1.2fr] sm:gap-8"
           >
             <div>
@@ -87,11 +72,10 @@ export default function Experience() {
                 ))}
               </ul>
             </div>
-          </motion.div>
+          </div>
         ))}
 
-        <motion.div
-          {...enter(ROLES.length)}
+        <div
           className="grid gap-3 py-7 sm:grid-cols-[0.8fr_1.2fr] sm:gap-8"
         >
           <div>
@@ -106,7 +90,7 @@ export default function Experience() {
             {EDUCATION.degree}
             <span className="text-slate-400 dark:text-slate-500"> · {EDUCATION.note}</span>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
