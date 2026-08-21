@@ -17,6 +17,7 @@ const LeverageSection = () => {
   const [dragging, setDragging] = useState(false);
   const [touched, setTouched] = useState(false);
   const [travel, setTravel] = useState({ effort: 0, result: 0 });
+  const [focused, setFocused] = useState(false);
   const scrollYProgress = useNarrativeProgress({
     target: ref,
     offset: ['start start', 'end start'],
@@ -133,7 +134,7 @@ const LeverageSection = () => {
             <svg
               ref={svgRef}
               viewBox="0 0 400 100"
-              className={`w-full touch-none overflow-visible ${
+              className={`w-full touch-none overflow-visible outline-none ${
                 dragging ? 'cursor-grabbing' : 'cursor-grab'
               }`}
               role="slider"
@@ -147,6 +148,8 @@ const LeverageSection = () => {
               onPointerUp={onPointerUp}
               onPointerCancel={onPointerUp}
               onKeyDown={onKeyDown}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
             >
               {/* Fulcrum — off-center triangle at 35% */}
               <polygon
@@ -191,6 +194,16 @@ const LeverageSection = () => {
                         touched ? 'opacity-0' : 'opacity-70'
                       }`}
                     />
+                    {focused && (
+                      <circle
+                        cx="55"
+                        cy="18"
+                        r="17"
+                        fill="none"
+                        strokeWidth="2"
+                        className="stroke-blue-500 dark:stroke-blue-400"
+                      />
+                    )}
 
                     {/* Result ball — large, on long arm */}
                     <circle cx="330" cy="10" r="20" className="fill-blue-500 dark:fill-blue-400" />
