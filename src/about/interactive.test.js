@@ -49,6 +49,14 @@ describe('PublishMachine', () => {
       .toBeInTheDocument();
   });
 
+  test('the biggest video reads as 1.5M, not 1500K', () => {
+    render(<PublishMachine />);
+    const publish = screen.getByRole('button', { name: /publish one/i });
+    for (let i = 0; i < CATALOGUE_COUNT; i += 1) fireEvent.click(publish);
+    const best = screen.getByText('best one').closest('div');
+    expect(within(best).getByText('1.5M')).toBeInTheDocument();
+  });
+
   test('start over refills the deck', () => {
     render(<PublishMachine />);
     fireEvent.click(screen.getByRole('button', { name: /publish one/i }));

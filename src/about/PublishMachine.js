@@ -26,7 +26,12 @@ const shuffle = (arr) => {
 };
 
 const fmt = (n) => n.toLocaleString();
-const short = (n) => (n >= 1000 ? `${Math.round(n / 1000)}K` : `${n}`);
+/* 1,500,000 was rendering as "1500K". Roll over to millions. */
+const short = (n) => {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
+  return `${n}`;
+};
 
 /* One line of commentary, chosen by what has actually happened so far.
    It never congratulates and never hedges — it just reports the state. */
