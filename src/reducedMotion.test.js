@@ -27,7 +27,10 @@ test('reduced motion reveals the narrative instead of hiding it', async () => {
 
   window.location.hash = '#/about';
   const { container } = render(<App />);
-  await screen.findByText(/my philosophy/i);
+  /* About is behind React.lazy, so this waits on a dynamic import resolving,
+     not just a render. The default 1s findBy timeout is enough on a laptop and
+     not always enough on a CI runner, which made this fail intermittently. */
+  await screen.findByText(/my philosophy/i, {}, { timeout: 15000 });
 
   /* Every scroll section starts at opacity 0 and is revealed by scrolling.
      Freezing the progress input has to land them at their revealed state,
@@ -39,5 +42,5 @@ test('reduced motion reveals the narrative instead of hiding it', async () => {
       return !Number.isNaN(o) && o < 0.05 && el.textContent.trim().length > 0;
     });
     expect(hidden.map((el) => el.textContent.trim().slice(0, 40))).toEqual([]);
-  });
-});
+  }, { timeout: 15000 });
+}, 30000);
