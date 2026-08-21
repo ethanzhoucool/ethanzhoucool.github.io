@@ -134,7 +134,7 @@ const LeverageSection = () => {
             <svg
               ref={svgRef}
               viewBox="0 0 400 100"
-              className={`w-full touch-none overflow-visible outline-none ${
+              className={`w-full touch-none overflow-visible ${
                 dragging ? 'cursor-grabbing' : 'cursor-grab'
               }`}
               role="slider"

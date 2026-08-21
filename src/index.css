@@ -23,6 +23,16 @@ body {
   outline-offset: 3px;
   border-radius: 4px;
 }
+/* The lever is role="slider" with a tabIndex, so Chrome counts a mouse click
+   as focus-visible — a slider is a widget that takes keyboard input. That drew
+   the outline below around the whole figure after every drag. The indicator is
+   a ring on the handle instead; this has to live here because the utility
+   class loses to the rule above, which is declared later in this file. */
+svg[role='slider']:focus,
+svg[role='slider']:focus-visible {
+  outline: none;
+}
+
 :is(.dark) :focus-visible {
   outline-color: #60a5fa;
 }
