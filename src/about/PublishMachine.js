@@ -99,7 +99,7 @@ export default function PublishMachine() {
             {/* The chart */}
             <div className="px-6 pt-7 sm:px-8">
               <div
-                className="flex items-end gap-px overflow-hidden border-b border-slate-200 dark:border-slate-800"
+                className="flex items-end gap-px overflow-hidden border-b border-slate-300 dark:border-slate-700"
                 style={{ height: 150 }}
               >
                 {drawn.length === 0 && (
@@ -111,7 +111,7 @@ export default function PublishMachine() {
                 )}
                 {drawn.map((v, i) => {
                   const isBest = v === best;
-                  const h = Math.max(2, (v / max) * 100);
+                  const h = Math.max(3, (v / max) * 100);
                   return (
                     <motion.div
                       key={i}
@@ -119,10 +119,11 @@ export default function PublishMachine() {
                       animate={{ height: `${h}%`, opacity: 1 }}
                       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                       title={`${fmt(v)} views`}
-                      className={`min-w-[1px] flex-1 ${
+                      style={{ width: `${100 / CATALOGUE_COUNT}%` }}
+                      className={`min-w-[2px] flex-none rounded-t-[1px] ${
                         isBest
                           ? 'bg-blue-500 dark:bg-blue-400'
-                          : 'bg-slate-300 dark:bg-slate-700'
+                          : 'bg-slate-400 dark:bg-slate-600'
                       }`}
                     />
                   );
