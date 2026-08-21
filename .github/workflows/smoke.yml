@@ -1,0 +1,53 @@
+name: smoke
+
+# Production is served by Vercel, which builds and deploys from main on its
+# own. There is nothing for a workflow to publish — so this checks the result
+# instead of pretending to cause it.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: check the live site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # Vercel starts building on the same push, so give it a head start
+      # before asking whether the site is healthy.
+      - name: Wait for the Vercel build
+        run: sleep 90
+
+      - name: Every route answers
+        run: |
+          fail=0
+          for path in "" "#/work" "#/about" "#/content"; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://www.ethanzhou.ca/$path")
+            printf '%-12s %s\n' "/${path}" "$code"
+            [ "$code" = "200" ] || fail=1
+          done
+          exit $fail
+
+      - name: The page still says who it belongs to
+        run: |
+          html=$(curl -s https://www.ethanzhou.ca/)
+          echo "$html" | grep -q '<title>Ethan Zhou</title>' || {
+            echo "::error::the live page lost its title"; exit 1; }
+          bundle=$(echo "$html" | grep -o '/static/js/main\.[a-z0-9]*\.js' | head -1)
+          test -n "$bundle" || { echo "::error::no main bundle referenced"; exit 1; }
+          echo "serving $bundle"
+          curl -sfo /dev/null "https://www.ethanzhou.ca$bundle" || {
+            echo "::error::the referenced bundle 404s"; exit 1; }
+
+      - name: The custom domain is still pointed at us
+        run: |
+          server=$(curl -sI https://www.ethanzhou.ca/ | grep -i '^server:' | tr -d '\r')
+          echo "$server"
+          curl -sI https://ethanzhou.ca/ -o /dev/null -w 'apex: %{http_code}\n'
