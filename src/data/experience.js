@@ -14,9 +14,8 @@ export const ROLES = [
     note: 'YC F24',
     role: 'Growth Engineer',
     kind: 'Internship',
-    period: 'Mar 2026 to present',
-    place: 'San Francisco',
-    current: true,
+    period: 'Mar 2026 to Sep 2026',
+    place: 'San Francisco · On-site',
     points: [
       'product hunt vercel day winner, 1 of 781',
       '5M impressions on X',
