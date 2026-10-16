@@ -39,7 +39,61 @@ export const FEATURED_TWO = {
   art: 'scan',
 };
 
+/* The third feature row. A whole native app, not a script, so it gets the
+   width: the artifact is a live schematic with its waveform underneath. */
+export const FEATURED_THREE = {
+  slug: 'quartzite-mac',
+  title: 'Quartzite',
+  blurb:
+    'apple silicon macs cannot run quartus, which is a problem when your digital-logic lab requires it. so i wrote a native macos schematic editor that simulates the circuit and exports a real quartus project for the cyclone v board.',
+  stack: ['Swift', 'macOS', 'Digital Logic', 'FPGA'],
+  repo: 'https://github.com/ethanzhoucool/quartzite-mac',
+  live: null,
+  note: ['editor + simulator + compile report', 'exports .bdf / .qsf / .vwf'],
+  art: 'schematic',
+};
+
 export const PROJECTS = [
+  {
+    slug: 'mobile-bisect',
+    title: 'mobile-bisect',
+    blurb:
+      'git bisect for mobile. it replays the broken flow on a cloud device across a commit range, decides pass or fail by looking at the app, and names the commit that broke it.',
+    stack: ['TypeScript', 'CLI', 'Cloud Devices'],
+    repo: 'https://github.com/ethanzhoucool/mobile-bisect',
+    live: null,
+    art: 'bisect',
+  },
+  {
+    slug: 'atlas-review',
+    title: 'Atlas Review',
+    blurb:
+      'visual review for every screen in an app. build-over-build diffs, the first build where something changed, approvals and alerts, all in one self-contained html file.',
+    stack: ['Python', 'CLI', 'Visual Diff'],
+    repo: 'https://github.com/ethanzhoucool/atlas-review',
+    live: null,
+    art: 'review',
+  },
+  {
+    slug: 'lumen',
+    title: 'Lumen',
+    blurb:
+      'a swiftui rewards wallet packed with about a dozen animations, several of them gating the main action. built as the app ui test tools flake on.',
+    stack: ['Swift', 'SwiftUI', 'iOS'],
+    repo: 'https://github.com/ethanzhoucool/lumen',
+    live: null,
+    art: 'wallet',
+  },
+  {
+    slug: 'x-launch-filter',
+    title: 'X Launch Filter',
+    blurb:
+      'a chrome extension that cuts the x home timeline down to launch and product posts. failing posts are dropped from the api response before x ever renders them.',
+    stack: ['JavaScript', 'Chrome MV3'],
+    repo: 'https://github.com/ethanzhoucool/x-launch-filter',
+    live: null,
+    art: 'feed',
+  },
   {
     slug: 'atlas-pr-diff',
     title: 'Atlas PR Diff',
@@ -88,6 +142,8 @@ export const PROJECTS = [
 /* Shown as a quiet closing line under the grid, not as more cards. */
 export const MORE_REPOS = [
   { name: 'mobile-devtools', url: 'https://github.com/ethanzhoucool/mobile-devtools' },
+  { name: 'wealthscope-dashboard', url: 'https://github.com/ethanzhoucool/wealthscope-dashboard' },
+  { name: 'glow-vitalrise', url: 'https://github.com/ethanzhoucool/glow-vitalrise' },
 ];
 
 export const GITHUB_URL = 'https://github.com/ethanzhoucool';
