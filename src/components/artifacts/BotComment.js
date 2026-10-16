@@ -1,9 +1,14 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { useLoop } from './useLoop';
 
 /*
  * atlas-pr-diff's actual output: the sticky comment it leaves on a pull
  * request. Rendered as the comment rather than described, because anyone who
  * has reviewed a mobile PR recognises the genre on sight.
+ *
+ * In motion, a reviewer's eye walks it: each row lights in turn, then the
+ * verdict line. At rest nothing is lit and the comment reads as posted.
  */
 const ROWS = [
   ['+', 'Checkout / Apple Pay', 'new screen', 'untested'],
@@ -11,9 +16,14 @@ const ROWS = [
   ['−', 'Promo code modal', 'removed', 'n/a'],
 ];
 
+const BEATS = [1300, 1300, 1300, 1600, 1400];
+const TINT = 'rgba(59, 130, 246, 0.09)';
+const CLEAR = 'rgba(59, 130, 246, 0)';
+
 export default function BotComment() {
+  const { ref, beat } = useLoop(BEATS, { restAt: 4 });
   return (
-    <figure className="m-0 overflow-hidden rounded-card border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+    <figure ref={ref} className="m-0 overflow-hidden rounded-card border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
         <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-slate-900 font-mono text-[8px] font-semibold text-white dark:bg-slate-100 dark:text-slate-900">
           A
@@ -41,9 +51,12 @@ export default function BotComment() {
 
         <table className="mt-2 w-full border-collapse">
           <tbody>
-            {ROWS.map(([sign, screen, change, cover]) => (
-              <tr
+            {ROWS.map(([sign, screen, change, cover], i) => (
+              <motion.tr
                 key={screen}
+                initial={false}
+                animate={{ backgroundColor: beat === i ? TINT : CLEAR }}
+                transition={{ duration: 0.35 }}
                 className="border-t border-slate-100 align-top dark:border-slate-800"
               >
                 <td
@@ -74,14 +87,19 @@ export default function BotComment() {
                     {cover}
                   </span>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
 
-        <div className="mt-2 border-t border-slate-100 pt-2 font-mono text-[10px] text-slate-400 dark:border-slate-800 dark:text-slate-500">
+        <motion.div
+          className="mt-2 border-t border-slate-100 pt-2 font-mono text-[10px] dark:border-slate-800"
+          initial={false}
+          animate={{ color: beat === 3 ? '#e11d48' : '#94a3b8' }}
+          transition={{ duration: 0.35 }}
+        >
           1 flow reachable in this build has no test.
-        </div>
+        </motion.div>
       </div>
     </figure>
   );
