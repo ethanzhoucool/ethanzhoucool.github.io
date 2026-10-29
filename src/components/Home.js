@@ -100,13 +100,6 @@ export default function Home({ navigate }) {
               hi, i&rsquo;m ethan.
             </h1>
 
-            <p
-              className="rise rise-2 mt-6 max-w-[48ch] text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg"
-            >
-              i build developer tools for mobile teams, and make short videos
-              about money.
-            </p>
-
             <div className="rise rise-3 mt-9 flex flex-wrap items-center gap-3">
               <MagneticButton>
                 <EmailButton />

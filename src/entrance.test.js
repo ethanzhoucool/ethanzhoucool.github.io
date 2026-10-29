@@ -26,9 +26,7 @@ test('the hero and both tracks are readable on the first render', () => {
   window.location.hash = '';
   render(<App />);
   expect(screen.getByRole('heading', { name: /hi, i.m ethan/i })).toBeVisible();
-  expect(screen.getByText(/i build developer tools for mobile teams/i)).toBeVisible();
-  /* Both track cards, by their headings rather than their prose — the hero
-     paragraph and the first card share a phrase. */
+  /* Both track cards, by their headings. */
   expect(
     screen.getByRole('heading', { name: /developer tools for mobile teams/i })
   ).toBeVisible();
