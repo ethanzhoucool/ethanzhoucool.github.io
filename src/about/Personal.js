@@ -2,6 +2,33 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, useInView, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
 
+/* ─── The jiu jitsu clip in the hobbies grid ───
+   At 1.36 MB this is the heaviest asset on the site, and it sits at the very
+   end of a ~17,000px page. `autoPlay` overrides `preload`, so the browser
+   fetched every byte of it, plus its poster, the moment /about mounted, for
+   readers who never scroll that far. Nothing is requested now until the grid
+   is within 800px of the viewport. A reduced-motion visitor gets the poster
+   frame rather than a looping clip, matching the video on the work page. */
+const HobbyVideo = ({ src, poster, className }) => {
+  const ref = useRef(null);
+  const reduce = useReducedMotion();
+  const near = useInView(ref, { once: true, margin: '800px 0px' });
+
+  return (
+    <video
+      ref={ref}
+      src={near ? src : undefined}
+      poster={near ? poster : undefined}
+      preload="none"
+      autoPlay={near && !reduce}
+      loop
+      muted
+      playsInline
+      className={className}
+    />
+  );
+};
+
 /* ─── Hobbies grid with click-to-expand ─── */
 const HobbiesSection = () => {
   const ref = useRef(null);
@@ -90,9 +117,9 @@ const HobbiesSection = () => {
               >
                 <div className="aspect-square relative overflow-hidden">
                   {hobby.type === 'video' ? (
-                    <video src={hobby.src} poster={hobby.poster} preload="metadata" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" autoPlay loop muted playsInline />
+                    <HobbyVideo src={hobby.src} poster={hobby.poster} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <img src={hobby.src} alt={hobby.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={hobby.src} alt={hobby.label} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   )}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                 </div>
