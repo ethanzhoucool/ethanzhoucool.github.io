@@ -34,21 +34,21 @@ export default function Experience() {
                   {r.org}
                 </span>
                 {r.note && (
-                  <span className="rounded-chip bg-slate-900/[0.05] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:bg-slate-100/[0.08] dark:text-slate-400">
+                  <span className="rounded-chip bg-slate-900/[0.05] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-slate-600 dark:bg-slate-100/[0.08] dark:text-slate-400">
                     {r.note}
                   </span>
                 )}
                 {r.current && (
-                  <span className="rounded-chip bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                  <span className="rounded-chip bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-blue-700 dark:text-blue-400">
                     now
                   </span>
                 )}
               </div>
-              <div className="mt-1 text-xs text-slate-500 dark:text-slate-500">
+              <div className="mt-1 text-xs text-slate-500 dark:text-slate-400/80">
                 {r.period}
               </div>
               {r.place && (
-                <div className="text-xs text-slate-400 dark:text-slate-600">
+                <div className="text-xs text-slate-500 dark:text-slate-400/80">
                   {r.place}
                 </div>
               )}
@@ -58,7 +58,7 @@ export default function Experience() {
               <div className="text-base text-slate-800 dark:text-slate-200">
                 {r.role}
                 {r.kind && (
-                  <span className="text-slate-400 dark:text-slate-500"> · {r.kind}</span>
+                  <span className="text-slate-500 dark:text-slate-400/80"> · {r.kind}</span>
                 )}
               </div>
               <ul className="mt-3 space-y-1.5">
@@ -82,13 +82,13 @@ export default function Experience() {
             <div className="text-sm font-semibold text-slate-900 dark:text-slate-50">
               {EDUCATION.school}
             </div>
-            <div className="mt-1 text-xs text-slate-500 dark:text-slate-500">
+            <div className="mt-1 text-xs text-slate-500 dark:text-slate-400/80">
               {EDUCATION.period}
             </div>
           </div>
           <div className="text-base text-slate-800 dark:text-slate-200">
             {EDUCATION.degree}
-            <span className="text-slate-400 dark:text-slate-500"> · {EDUCATION.note}</span>
+            <span className="text-slate-500 dark:text-slate-400/80"> · {EDUCATION.note}</span>
           </div>
         </div>
       </div>

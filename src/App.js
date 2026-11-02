@@ -159,7 +159,7 @@ const Portfolio = () => {
 
         <footer className="mx-auto max-w-5xl px-6 pb-12 pt-8">
           <div className="flex flex-col items-center gap-5 border-t border-slate-200 pt-10 dark:border-slate-800 sm:flex-row sm:justify-between">
-            <div className="text-sm text-slate-400 dark:text-slate-600">
+            <div className="text-sm text-slate-500 dark:text-slate-400/80">
               © {new Date().getFullYear()} ethan zhou
             </div>
             <div className="flex gap-5">

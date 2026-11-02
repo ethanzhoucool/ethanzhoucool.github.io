@@ -70,7 +70,7 @@ export default function Content() {
             <div className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-4xl">
               {s.value}
             </div>
-            <div className="mt-2 text-sm text-slate-500 dark:text-slate-500">
+            <div className="mt-2 text-sm text-slate-500 dark:text-slate-400/80">
               {s.label}
             </div>
           </div>

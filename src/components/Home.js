@@ -172,7 +172,7 @@ function TwoTracks({ navigate }) {
             data-hover
             className={`rise rise-${i + 4} group relative flex flex-col rounded-card border border-slate-200 bg-white/70 p-7 text-left transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700 sm:p-8`}
           >
-            <span className="text-xs uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+            <span className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400/80">
               {t.kicker}
             </span>
 
@@ -189,7 +189,7 @@ function TwoTracks({ navigate }) {
                 <div className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
                   {t.stat}
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-500">
+                <div className="text-xs text-slate-500 dark:text-slate-400/80">
                   {t.statLabel}
                 </div>
               </div>
