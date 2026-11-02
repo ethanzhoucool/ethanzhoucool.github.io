@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { prefersReducedMotion } from './ui';
 
 /* ─── Pointer-following backdrop ──────────────────────────────────
    The soft radial wash behind every page that drifts toward the pointer.
@@ -11,7 +12,9 @@ import React, { useEffect, useRef } from 'react';
    useSpring applies, and the 40ms frame-delta cap framer's frame loop
    uses. It writes two custom properties; index.css owns the gradient.
 
-   Like the spring it replaces, it only runs while it is moving.
+   Like the spring it replaces, it only runs while it is moving. Under
+   reduced motion it stays centred, like every other pointer flourish in
+   components/ui.js: the wash is still there, it just does not chase you.
    ────────────────────────────────────────────────────────────── */
 
 const STIFFNESS = 60;
@@ -37,7 +40,7 @@ export default function Backdrop() {
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return undefined;
+    if (!el || prefersReducedMotion()) return undefined;
 
     const target = { x: 0.5, y: 0.5 };
     const x = { p: 0.5, v: 0 };

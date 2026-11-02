@@ -112,3 +112,26 @@ test('unmounting cancels the pending frame and stops listening', () => {
   expect(queue.size).toBe(0);
   expect(el.style.getPropertyValue('--backdrop-x')).toBe('');
 });
+
+test('holds still, centred, under reduced motion', () => {
+  const original = window.matchMedia;
+  window.matchMedia = (q) => ({
+    matches: /prefers-reduced-motion/.test(q),
+    media: q,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+  });
+  try {
+    const { el } = renderBackdrop();
+    fireEvent.mouseMove(window, { clientX: 10, clientY: 10 });
+    expect(queue.size).toBe(0);
+    for (let i = 0; i < 30; i += 1) frame();
+    /* Left to the stylesheet's 50% 50%. */
+    expect(el.style.getPropertyValue('--backdrop-x')).toBe('');
+    expect(el.style.getPropertyValue('--backdrop-y')).toBe('');
+  } finally {
+    window.matchMedia = original;
+  }
+});
