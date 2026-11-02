@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
@@ -10,9 +11,14 @@
 
     <!-- Open Graph / iMessage Preview -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Ethan Zhou" />
     <meta property="og:title" content="Ethan Zhou" />
     <meta property="og:description" content="I build mobile developer tools and make finance videos for 20,000 people." />
     <meta property="og:image" content="https://www.ethanzhou.ca/images/headshot.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="600" />
+    <meta property="og:image:height" content="800" />
+    <meta property="og:image:alt" content="Ethan Zhou, grinning and covered in mud on a grassy field" />
     <meta property="og:url" content="https://www.ethanzhou.ca" />
 
     <!-- Twitter Card -->
@@ -20,8 +26,29 @@
     <meta name="twitter:title" content="Ethan Zhou" />
     <meta name="twitter:description" content="I build mobile developer tools and make finance videos for 20,000 people." />
     <meta name="twitter:image" content="https://www.ethanzhou.ca/images/headshot.jpg" />
+    <meta name="twitter:image:alt" content="Ethan Zhou, grinning and covered in mud on a grassy field" />
 
     <link rel="canonical" href="https://www.ethanzhou.ca" />
+
+    <!--
+      Structured data, so search engines can tie this site to the same person's
+      profiles. Every URL here is one the site itself already links to.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Ethan Zhou",
+        "url": "https://www.ethanzhou.ca",
+        "image": "https://www.ethanzhou.ca/images/seriousheadshot.JPG",
+        "sameAs": [
+          "https://github.com/ethanzhoucool",
+          "https://www.youtube.com/@Ethanzhouwealth",
+          "https://instagram.com/ethanzhouwealth",
+          "https://www.linkedin.com/in/ethan-zhou-832565315/"
+        ]
+      }
+    </script>
 
     <!--
       hey there, thanks for inspecting.
