@@ -37,6 +37,12 @@ export function canHover() {
       read at 60fps. Now sampled every 4th frame, which is far below
       the threshold where you would notice.
    3. Bails out entirely on coarse pointers and reduced motion.
+   4. The frame loop used to run forever, 60 callbacks a second, while
+      the pointer sat still on the page. It now runs only while there is
+      something to animate (pointer moving, ring still trailing) and
+      parks itself once settled. Scrolls and clicks wake it for a beat
+      too: they change what sits under a still pointer, which is what
+      the hover check samples.
    ────────────────────────────────────────────────────────────── */
 export function CustomCursor() {
   const dotRef = useRef(null);
@@ -53,59 +59,92 @@ export function CustomCursor() {
     let hovering = false;
     let visible = false;
     let frame = 0;
-    let raf;
+    let raf = null;
+    /* Frames the loop keeps running after the last input, so the hover check
+       still samples a few times once things stop moving (about 0.4s). */
+    const LINGER = 24;
+    let linger = 0;
+
+    const checkHover = (dot, rng) => {
+      const el = document.elementFromPoint(pos.x, pos.y);
+      /* The artifacts live inside the project links, so the whole card
+         counts as hoverable and the cursor used to balloon to 44px over
+         the very detail it is sitting on. Stay small inside them. */
+      const next = !!(
+        el &&
+        el.closest('a, button, [role="button"], [data-hover]') &&
+        !el.closest('[data-artifact]')
+      );
+      if (next !== hovering) {
+        hovering = next;
+        dot.className = `custom-cursor${hovering ? ' hovering' : ''}`;
+        rng.className = `cursor-ring${hovering ? ' hovering' : ''}`;
+      }
+    };
+
+    const animate = () => {
+      raf = null;
+      const dot = dotRef.current;
+      const rng = ringRef.current;
+      if (!dot || !rng) return;
+
+      dot.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+      dot.style.opacity = visible ? 1 : 0;
+
+      /* Deliberate trail: the ring eases toward the dot. */
+      ring.x += (pos.x - ring.x) * 0.18;
+      ring.y += (pos.y - ring.y) * 0.18;
+      const settled = Math.abs(pos.x - ring.x) < 0.1 && Math.abs(pos.y - ring.y) < 0.1;
+      if (settled) {
+        ring.x = pos.x;
+        ring.y = pos.y;
+      }
+      rng.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0)`;
+      rng.style.opacity = visible ? 1 : 0;
+
+      linger -= 1;
+      const parking = settled && linger <= 0;
+      /* Always sample on the last frame, so it parks in the right state. */
+      if (frame % 4 === 0 || parking) checkHover(dot, rng);
+      frame += 1;
+
+      if (!parking) raf = requestAnimationFrame(animate);
+    };
+
+    const wake = () => {
+      linger = LINGER;
+      if (raf === null) raf = requestAnimationFrame(animate);
+    };
 
     const onMove = (e) => {
       pos.x = e.clientX;
       pos.y = e.clientY;
       visible = true;
+      wake();
     };
     const onLeave = () => {
       visible = false;
+      wake();
     };
-
-    const animate = () => {
-      const dot = dotRef.current;
-      const rng = ringRef.current;
-      if (dot && rng) {
-        dot.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
-        dot.style.opacity = visible ? 1 : 0;
-
-        /* Deliberate trail: the ring eases toward the dot. */
-        ring.x += (pos.x - ring.x) * 0.18;
-        ring.y += (pos.y - ring.y) * 0.18;
-        rng.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0)`;
-        rng.style.opacity = visible ? 1 : 0;
-
-        if (frame % 4 === 0) {
-          const el = document.elementFromPoint(pos.x, pos.y);
-          /* The artifacts live inside the project links, so the whole card
-             counts as hoverable and the cursor used to balloon to 44px over
-             the very detail it is sitting on. Stay small inside them. */
-          const next = !!(
-            el &&
-            el.closest('a, button, [role="button"], [data-hover]') &&
-            !el.closest('[data-artifact]')
-          );
-          if (next !== hovering) {
-            hovering = next;
-            dot.className = `custom-cursor${hovering ? ' hovering' : ''}`;
-            rng.className = `cursor-ring${hovering ? ' hovering' : ''}`;
-          }
-        }
-        frame += 1;
-      }
-      raf = requestAnimationFrame(animate);
+    /* Only worth a hover check once the pointer has actually arrived. */
+    const onShift = () => {
+      if (visible) wake();
     };
 
     window.addEventListener('mousemove', onMove, { passive: true });
     document.addEventListener('mouseleave', onLeave);
-    raf = requestAnimationFrame(animate);
+    /* Capture, so scrolls inside nested containers count as well. */
+    document.addEventListener('scroll', onShift, { passive: true, capture: true });
+    window.addEventListener('click', onShift, { passive: true });
+    window.addEventListener('hashchange', onShift);
 
     return () => {
       window.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseleave', onLeave);
-      cancelAnimationFrame(raf);
+      document.removeEventListener('scroll', onShift, { capture: true });
+      window.removeEventListener('click', onShift);
+      window.removeEventListener('hashchange', onShift);
+      if (raf !== null) cancelAnimationFrame(raf);
       root.classList.remove('cursor-custom');
     };
   }, []);
