@@ -1,4 +1,4 @@
-import { render, screen, within, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, within, waitFor, fireEvent, act } from '@testing-library/react';
 import App from './App';
 
 /*
@@ -27,18 +27,25 @@ test('every nav route is reachable', () => {
   }
 });
 
-test('work page lists more than one project', () => {
+/* Work is behind React.lazy, so these wait for its chunk before asserting.
+   Without the wait they would be looking at the Suspense fallback. */
+async function renderWork() {
   window.location.hash = '#/work';
-  render(<App />);
+  const utils = render(<App />);
+  await screen.findByText(/^experience$/i);
+  return utils;
+}
+
+test('work page lists more than one project', async () => {
+  await renderWork();
   const repoLinks = screen
     .getAllByRole('link')
     .filter((a) => (a.getAttribute('href') || '').includes('github.com/ethanzhoucool'));
   expect(repoLinks.length).toBeGreaterThan(1);
 });
 
-test('experience is reachable, not orphaned', () => {
-  window.location.hash = '#/work';
-  render(<App />);
+test('experience is reachable, not orphaned', async () => {
+  await renderWork();
   expect(screen.getByText(/^experience$/i)).toBeInTheDocument();
   expect(screen.getByText(/United Lift Technologies/i)).toBeInTheDocument();
   /* The current job was missing from the page entirely. */
@@ -53,12 +60,35 @@ test('the YouTube admin screenshot is gone from the content page', () => {
   expect(srcs).not.toContain('/images/featured.png');
 });
 
-test('no em-dashes in rendered copy', () => {
+test('no em-dashes in rendered copy', async () => {
   for (const hash of ['#/', '#/work', '#/content']) {
     window.location.hash = hash;
     const { container, unmount } = render(<App />);
+    if (hash === '#/work') await screen.findByText(/^experience$/i);
     expect(container.textContent).not.toMatch(/[—–]/);
     unmount();
+  }
+});
+
+test('typing "hire" shows the easter egg, and it goes away again', () => {
+  jest.useFakeTimers();
+  try {
+    window.location.hash = '';
+    render(<App />);
+    const toast = screen.getByText(/you typed/i).closest('.easter-egg');
+    expect(toast).not.toHaveClass('is-shown');
+    expect(toast).toHaveAttribute('aria-hidden', 'true');
+
+    for (const key of 'hire') fireEvent.keyDown(window, { key });
+    expect(toast).toHaveClass('is-shown');
+    expect(toast).toHaveAttribute('aria-hidden', 'false');
+
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+    expect(toast).not.toHaveClass('is-shown');
+  } finally {
+    jest.useRealTimers();
   }
 });
 

@@ -341,3 +341,52 @@ html.cursor-custom * {
     animation: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Pointer backdrop
+
+   Position comes from components/Backdrop.js as two custom properties;
+   the gradient itself lives here so the tint can follow the theme.
+   ═══════════════════════════════════════════════════════════════ */
+.pointer-backdrop {
+  --backdrop-x: 50%;
+  --backdrop-y: 50%;
+  background: radial-gradient(
+    ellipse 80% 60% at var(--backdrop-x) var(--backdrop-y),
+    rgba(219, 234, 254, 0.6),
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+:is(.dark) .pointer-backdrop {
+  background: radial-gradient(
+    ellipse 80% 60% at var(--backdrop-x) var(--backdrop-y),
+    rgba(51, 65, 85, 0.4),
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   "hire" easter egg toast
+
+   Drops in from 12px above, the same entrance it had under framer-motion:
+   opacity on framer's default 0.3s tween curve, the drop with a touch of
+   overshoot standing in for its default spring. Always mounted, so the exit
+   plays too; `visibility` keeps it out of the accessibility tree while
+   hidden. Composes with Tailwind's -translate-x-1/2 through its variables.
+   ═══════════════════════════════════════════════════════════════ */
+.easter-egg {
+  --tw-translate-y: -12px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.25, 0.1, 0.35, 1),
+    transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1), visibility 0s linear 0.4s;
+}
+
+.easter-egg.is-shown {
+  --tw-translate-y: 0px;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s cubic-bezier(0.25, 0.1, 0.35, 1),
+    transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1), visibility 0s;
+}

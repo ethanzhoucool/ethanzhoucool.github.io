@@ -1,18 +1,53 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { motion, useTransform, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Mail, Instagram, Linkedin, Youtube } from 'lucide-react';
 
 import { useHashRoute } from './useHashRoute';
 import { CustomCursor } from './components/ui';
+import Backdrop from './components/Backdrop';
 import Nav from './components/Nav';
 import Home from './components/Home';
-import Work from './components/Work';
 import Content from './components/Content';
 
 /* The about narrative is eleven scroll-driven sections and the bulk of the
    framer-motion surface. It is only reachable at #/about, so it is split out
    of the main bundle rather than shipped to everyone who lands on home. */
 const About = lazy(() => import('./about/About'));
+
+/* Work is split out for the same reason: it carries the project artifacts,
+   and it is where framer-motion would re-enter the main bundle the moment an
+   artifact animates with it. Nothing on the home page needs either.
+
+   It is warmed once the page is idle, and rendered directly once loaded.
+   React.lazy on its own would still suspend on the first render even with
+   the module already in memory, and React holds a suspended boundary's
+   fallback for 300ms, so the first click on "work" would blank the page for
+   that long. Measured, it took ~330ms to show work content against ~15ms
+   when it was bundled. Rendering the loaded module directly keeps it at
+   the old speed; LazyWork only covers someone landing straight on #/work. */
+let WorkPage = null;
+const loadWork = () =>
+  import('./components/Work').then((m) => {
+    WorkPage = m.default;
+    return m;
+  });
+const LazyWork = lazy(loadWork);
+
+function Work() {
+  /* Chosen once per mount: switching from LazyWork to WorkPage mid-life would
+     read to React as a different component and remount the whole page. */
+  const [Page] = useState(() => WorkPage || LazyWork);
+  return <Page />;
+}
+
+function warmWorkWhenIdle() {
+  const warm = () => loadWork().catch(() => {});
+  if (typeof window.requestIdleCallback === 'function') {
+    const id = window.requestIdleCallback(warm, { timeout: 4000 });
+    return () => window.cancelIdleCallback(id);
+  }
+  const id = setTimeout(warm, 1500);
+  return () => clearTimeout(id);
+}
 
 /* Holds the viewport while the chunk arrives, so the sticky sections below do
    not fight a collapsing scroll height. */
@@ -42,29 +77,9 @@ const Portfolio = () => {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
-  /* The pointer-following backdrop used to live in useState, so every single
-     mousemove re-rendered the whole page. Motion values keep it off the React
-     render path entirely. */
-  const mx = useMotionValue(0.5);
-  const my = useMotionValue(0.5);
-  const smx = useSpring(mx, { stiffness: 60, damping: 20 });
-  const smy = useSpring(my, { stiffness: 60, damping: 20 });
-  const bgX = useTransform(smx, (v) => `${v * 100}%`);
-  const bgY = useTransform(smy, (v) => `${v * 100}%`);
-  const tint = darkMode ? 'rgba(51, 65, 85, 0.40)' : 'rgba(219, 234, 254, 0.60)';
-  const backdrop = useMotionTemplate`radial-gradient(ellipse 80% 60% at ${bgX} ${bgY}, ${tint}, rgba(0,0,0,0) 100%)`;
-
-  const onPointerMove = useCallback(
-    (e) => {
-      mx.set(e.clientX / window.innerWidth);
-      my.set(e.clientY / window.innerHeight);
-    },
-    [mx, my]
-  );
+  useEffect(warmWorkWhenIdle, []);
 
   useEffect(() => {
-    window.addEventListener('mousemove', onPointerMove, { passive: true });
-
     console.log(
       '%c👋 hi, you found the console!',
       'font-size: 20px; font-weight: bold; color: #2563eb;'
@@ -86,18 +101,13 @@ const Portfolio = () => {
     window.addEventListener('keydown', onKey);
 
     return () => {
-      window.removeEventListener('mousemove', onPointerMove);
       window.removeEventListener('keydown', onKey);
     };
-  }, [onPointerMove]);
+  }, []);
 
   return (
     <div className="min-h-[100dvh] bg-slate-50 font-sans text-slate-900 transition-colors duration-500 dark:bg-slate-950 dark:text-slate-100">
-      <motion.div
-        className="pointer-events-none fixed inset-0 z-0"
-        style={{ background: backdrop }}
-        aria-hidden="true"
-      />
+      <Backdrop />
 
       <CustomCursor />
 
@@ -108,23 +118,23 @@ const Portfolio = () => {
         Skip to content
       </a>
 
-      <AnimatePresence>
-        {easterEgg && (
-          <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            className="fixed left-1/2 top-20 z-50 -translate-x-1/2 rounded-full border border-slate-200 bg-white px-6 py-3 shadow-card-hover dark:border-slate-700 dark:bg-slate-900"
-          >
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-              🎉 you typed &quot;hire&quot;. i like where this is going →{' '}
-              <span className="font-semibold text-blue-600 dark:text-blue-400">
-                info@ethanzhou.ca
-              </span>
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* A CSS transition rather than AnimatePresence, so the shell needs no
+          animation library. It also centres properly now: framer-motion wrote
+          an inline `transform: none` at rest, which overrode -translate-x-1/2
+          and left the toast hanging off to the right of centre. */}
+      <div
+        className={`easter-egg fixed left-1/2 top-20 z-50 -translate-x-1/2 rounded-full border border-slate-200 bg-white px-6 py-3 shadow-card-hover dark:border-slate-700 dark:bg-slate-900${
+          easterEgg ? ' is-shown' : ''
+        }`}
+        aria-hidden={!easterEgg}
+      >
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+          🎉 you typed &quot;hire&quot;. i like where this is going →{' '}
+          <span className="font-semibold text-blue-600 dark:text-blue-400">
+            info@ethanzhou.ca
+          </span>
+        </span>
+      </div>
 
       <div className="relative z-10">
         <Nav
@@ -147,7 +157,11 @@ const Portfolio = () => {
               nothing at all. */}
           <div key={route} className="route-fade">
             {route === 'home' && <Home navigate={navigate} />}
-            {route === 'work' && <Work />}
+            {route === 'work' && (
+              <Suspense fallback={<RouteFallback />}>
+                <Work />
+              </Suspense>
+            )}
             {route === 'content' && <Content />}
             {route === 'about' && (
               <Suspense fallback={<RouteFallback />}>
