@@ -1,5 +1,6 @@
 /*
  * Taken from Ethan's LinkedIn, which is the source of truth he pointed at.
+ * The exception is Revyl's impressions and signups, which follow his resume.
  *
  * The hand-written version this replaces was wrong in four ways: it had the
  * company as "United Lifts" (it is United Lift), listed that role as current
@@ -18,8 +19,8 @@ export const ROLES = [
     place: 'San Francisco · On-site',
     points: [
       'product hunt vercel day winner, 1 of 781',
-      '5M impressions on X',
-      'monthly signups from 47 to ~1,800, a 38x lift',
+      '6M impressions on X',
+      'monthly signups from 47 to ~1,000, a 21x lift',
     ],
   },
   {
