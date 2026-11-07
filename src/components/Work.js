@@ -1,6 +1,7 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { ArrowUpRight, Github } from 'lucide-react';
-import { FEATURED, FEATURED_TWO, PROJECTS, MORE_REPOS, GITHUB_URL } from '../data/work';
+import { FEATURED, FEATURED_TWO, FEATURED_THREE, PROJECTS, MORE_REPOS, GITHUB_URL } from '../data/work';
 import Experience from './Experience';
 
 import PhoneScan from './artifacts/PhoneScan';
@@ -9,6 +10,11 @@ import DropoffFigure from './artifacts/DropoffFigure';
 import BotComment from './artifacts/BotComment';
 import DeviceGif from './artifacts/DeviceGif';
 import RobotPath from './artifacts/RobotPath';
+import Schematic from './artifacts/Schematic';
+import Bisect from './artifacts/Bisect';
+import ReviewDiff from './artifacts/ReviewDiff';
+import CardStack from './artifacts/CardStack';
+import FeedFilter from './artifacts/FeedFilter';
 
 /* Read once. Autoplaying video is motion, and a reduced-motion visitor should
    get a poster frame and a play button instead. */
@@ -35,9 +41,14 @@ function Artifact({ name }) {
   if (name === 'comment') return <BotComment />;
   if (name === 'gif') return <DeviceGif />;
   if (name === 'robot') return <RobotPath />;
+  if (name === 'bisect') return <Bisect />;
+  if (name === 'review') return <ReviewDiff />;
+  if (name === 'wallet') return <CardStack />;
+  if (name === 'feed') return <FeedFilter />;
   return null;
 }
 export default function Work() {
+  const reducedMotion = PREFERS_REDUCED_MOTION;
 
   return (
     <section className="mx-auto max-w-5xl px-6 pt-10 pb-24">
@@ -134,16 +145,68 @@ export default function Work() {
         </div>
       </a>
 
+      {/* Third feature, back to the first row's handedness. The schematic and
+          its waveform need the width a grid cell does not have. */}
+      <a
+        href={FEATURED_THREE.repo}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-hover
+        className="rise rise-5 group mt-5 block overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
+      >
+        <div className="grid md:grid-cols-[1fr_0.9fr]">
+          <div className="p-8 sm:p-10">
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 sm:text-4xl">
+              {FEATURED_THREE.title}
+            </h2>
+            <p className="mt-4 max-w-[44ch] text-base leading-relaxed text-slate-600 dark:text-slate-400">
+              {FEATURED_THREE.blurb}
+            </p>
+            <div className="mt-7 flex flex-wrap items-center gap-2">
+              {FEATURED_THREE.stack.map((s) => (
+                <Chip key={s}>{s}</Chip>
+              ))}
+            </div>
+            <span className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400">
+              source on github
+              <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </span>
+          </div>
+
+          <div data-artifact className="relative flex flex-col items-center justify-center gap-5 overflow-hidden border-t border-slate-200 bg-slate-900 p-8 md:border-l md:border-t-0 dark:border-slate-800">
+            <Schematic />
+            <div className="select-none text-center font-mono text-[10px] leading-[1.9] text-slate-500">
+              {FEATURED_THREE.note?.map((line) => (
+                <React.Fragment key={line}>
+                  {line}
+                  <br />
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </div>
+      </a>
+
       {/* Grid. Exactly as many cells as there are projects. */}
       <div className="mt-5 grid gap-4 sm:grid-cols-2 md:gap-5">
         {PROJECTS.map((p, i) => (
-          <a
+          /* Scroll entrance is transform only. If the animation never runs —
+             a throttled tab, a stalled observer — the card is 28px low, not
+             invisible. Odd cards trail even ones so a row lands as a pair. */
+          <motion.a
             key={p.slug}
+            initial={reducedMotion ? false : { y: 28 }}
+            whileInView={{ y: 0 }}
+            /* framer owns this card's transform now, so the hover lift the
+               other cards do in CSS is done here instead. */
+            whileHover={reducedMotion ? undefined : { y: -4, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }}
+            viewport={{ once: true, margin: '0px 0px -12% 0px' }}
+            transition={{ type: 'spring', stiffness: 170, damping: 24, delay: (i % 2) * 0.08 }}
             href={p.live || p.repo}
             target="_blank"
             rel="noopener noreferrer"
             data-hover
-            className="group flex flex-col overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
+            className="group flex flex-col overflow-hidden rounded-card border border-slate-200 bg-white/70 transition-[border-color,box-shadow] duration-300 hover:border-slate-300 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
           >
             {p.media && (
               <div data-artifact className="flex h-[224px] items-center justify-center overflow-hidden border-b border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-800">
@@ -185,7 +248,7 @@ export default function Work() {
                 <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </span>
             </div>
-          </a>
+          </motion.a>
         ))}
       </div>
 
