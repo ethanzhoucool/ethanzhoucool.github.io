@@ -1,6 +1,7 @@
 /*
  * Taken from Ethan's LinkedIn, which is the source of truth he pointed at.
- * The exception is Revyl's impressions and signups, which follow his resume.
+ * The exceptions follow the resume: Revyl's impressions and signups, and
+ * United Lift's title.
  *
  * The hand-written version this replaces was wrong in four ways: it had the
  * company as "United Lifts" (it is United Lift), listed that role as current
@@ -33,7 +34,7 @@ export const ROLES = [
   },
   {
     org: 'United Lift Technologies',
-    role: 'Marketing and Business Strategy',
+    role: 'Software Developer',
     kind: 'Internship',
     period: 'Apr 2024 to Dec 2025',
     place: 'Calgary',
